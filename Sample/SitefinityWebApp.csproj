@@ -1097,9 +1097,6 @@
       <DependentUpon>Cheker.aspx</DependentUpon>
     </Compile>
     <Compile Include="Custom\LibrariesMasterGridViewExtended.cs" />
-    <Compile Include="Global.asax.cs">
-      <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -1107,7 +1104,6 @@
     <Content Include="Custom\Cheker.aspx" />
     <Content Include="Custom\ImagesDownloader.js" />
     <Content Include="Default.aspx" />
-    <Content Include="Global.asax" />
     <Content Include="Sitefinity\Default.aspx" />
     <Content Include="Sitefinity\Public\Services\Thunder\ThunderService.svc" />
     <Content Include="Sitefinity\Services\Analytics\AnalyticsPermissionsService.svc" />

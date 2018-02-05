@@ -72,6 +72,7 @@
     <EmbeddedResource Include="LibraryItemsDownloadService.js" />
     <Compile Include="Custom\Services\ILibraryItemsDownloadService.cs" />
     <Compile Include="Custom\Services\LibraryItemsDownloadService.cs" />
+    <Compile Include="Installer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -16,6 +16,8 @@ namespace Sitefinity.LibraryItemsDownloader.Custom.Services
     [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Required)]
     public class LibraryItemsDownloadService : ILibraryItemsDownloadService
     {
+        public const string WebServicePath = "LibrariesService";
+
         public string DownloadImages(string[] imageIds)
         {
             string result = string.Empty;
@@ -37,7 +39,7 @@ namespace Sitefinity.LibraryItemsDownloader.Custom.Services
                             string imageName = Path.GetFileName(image.FilePath);
                             zipFiles.AddFileStream(imageName, string.Empty, stream);
                         }
-                    };
+                    }
                 }
 
                 zipFiles.Save(memoryStream);
