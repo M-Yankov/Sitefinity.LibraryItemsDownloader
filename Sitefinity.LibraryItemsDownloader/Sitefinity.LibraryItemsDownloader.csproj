@@ -72,6 +72,7 @@
     <EmbeddedResource Include="LibraryItemsDownloadService.js" />
     <Compile Include="Custom\Services\ILibraryItemsDownloadService.cs" />
     <Compile Include="Custom\Services\LibraryItemsDownloadService.cs" />
+    <Compile Include="Helpers\InstallationsHelper.cs" />
     <Compile Include="Installer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -81,5 +82,6 @@
     <None Include="bin\keyPair.snk" />
     <None Include="YankovAssemblySign.snk" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
