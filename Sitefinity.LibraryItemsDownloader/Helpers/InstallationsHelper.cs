@@ -44,9 +44,17 @@ namespace Sitefinity.LibraryItemsDownloader.Helpers
                 }
                 string key = Assembly.CreateQualifiedName(ass.FullName, fullNamespaceJavaScriptFile);
                 MasterGridViewElement masterV = view as MasterGridViewElement;
-                WidgetBarElement toolbar = (masterV.Toolbar as WidgetBarElement);
-                //TODO: var moreActionWidget = toolbar.Sections.Elements.FirstOrDefault(w => w.Name == "MoreActionsWidget");
+                // masterV.ToolbarConfig.Sections.Add(new WidgetBarSectionElement(null));
 
+                WidgetBarElement toolbar = (masterV.ToolbarConfig as WidgetBarElement);
+
+                IList<WidgetBarSectionElement> toolbalSections = toolbar.Sections;
+                var theToolBarSection = toolbalSections.FirstOrDefault(s => s.Name == "toolbar");
+                var theToolBarSection1 = theToolBarSection as WidgetBarSectionElement;
+
+
+                // var moreActionWidget = toolbar.Sections.Elements.FirstOrDefault(w => w.Name == "MoreActionsWidget");
+                // ActionMenuWidgetElement
                 if (!view.Scripts.ContainsKey(key))
                 {
                     var kc = new ClientScriptElement(view.Scripts);
