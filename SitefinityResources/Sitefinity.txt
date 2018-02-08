@@ -1,0 +1,64 @@
+Telerik.Sitefinity.Modules.Libraries.LibrariesMasterGridView, Telerik.Sitefinity
+-> SitefinityWebApp.Custom.LibrariesMasterGridViewExtended, SitefinityWebApp
+
+Telerik.Sitefinity.Resources.Templates.Backend.ContentUI.MasterGridView.ascx
+
+Telerik.Sitefinity.Web.UI.ContentUI.Views.Backend.Master.Scripts.MasterGridView.js ---
+
+Telerik.Sitefinity.Resources.Templates.Backend.ItemLists.ItemList.ascx
+!Telerik.Sitefinity.Resources.Templates.Backend.Libraries.ImagesListItemTemplate.ascx"
+
+  <sfBackend:WidgetBar runat="server" id="contextBar" />
+  Telerik.Sitefinity.Web.UI.Backend.Elements.Scripts.WidgetBar.js
+
+
+ImagesBackend - imgsCntView
+AlbumsBackend - imgAlbmsCntView
+
+Also search for  DeleteLibraryActionWidget
+and  deleteLibrary
+
+folderActionsWidget
+
+
+Telerik.Sitefinity.Resources.Templates.Backend.Buttons.MenuButton.ascx --> uses RadMenu
+Telerik.Sitefinity.Web.UI.Backend.Elements.Widgets.MenuButton.cs
+
+Telerik.Sitefinity.Web.UI.ContentUI.Views.Backend.Master.Scripts.LibrariesMasterExtensions.js
+
+Telerik.Sitefinity.Modules.Libraries.Scripts.LibrariesMasterGridView.js   ---
+
+After click on "DeleteAction" (for example)
+It invokes itemsBase.DeleteItems() which invokes
+binder.DeleteItems() which invokes
+clientManger.DeleteItems() which makes an XMLHttpRequest()
+
+helper files : 
+Telerik.Sitefinity.Web.UI.ContentUI.Views.Backend.Master.Scripts.LibrariesMasterExtensions.debug
+Telerik.Sitefinity.Web.UI.ItemLists.Scripts.ItemsListBase.debug
+Telerik.Sitefinity.Web.Scripts.ClientBinder.debug
+Telerik.Sitefinity.Web.Scripts.ClientManager.debug
+
+
+this._binder.get_selectedItems(); !!!!!!!!
+
+
+
+------------------------------------------------------------------------------------------------------------
+
+"Telerik.Sitefinity.Modules.Files.Web.UI.FileManager", "Telerik.Sitefinity.Modules.Files.Web.UI.Scripts.FileManager.js"
+
+FilesView uses FileManager(inherits RadMenuExporer)
+
+Check how it's working Telerik.Sitefinity.Modules.Files.FilesDownloadHandler.
+
+================
+Exception When browsing advanced settings (Libraries > Controls > ImagesBacked > Views > ImagesBackEndList > Scripts > one of the default script items ) (Object null reference exception) Data_Bind: this.get_urlParams() returns incorrect results.
+ check Telerik.Sitefinity.Web.Scripts.RadGridBinder.debug.js AND Telerik.Sitefinity.Configuration.Web.ConfigSectionItems
+===============
+
+
+ImagesBackend
+
+
+
