@@ -22,7 +22,7 @@ namespace Sitefinity.LibraryItemsDownloader.Helpers
         private const string MoreActionsWidgetName = "MoreActionsWidget";
         private const string DownloadSelectedImagesCommandName = "DownloadSelectedImages";
         private const string DownloadSelectedVideosCommandName = "DownloadSelectedVideos";
-        private const string DownloadSelectedDocumentsCommandName = "DownloadSelectedVideos";
+        private const string DownloadSelectedDocumentsCommandName = "DownloadSelectedDocuments";
 
         public void Initialize()
         {
@@ -64,6 +64,7 @@ namespace Sitefinity.LibraryItemsDownloader.Helpers
                 var scriptElement = new ClientScriptElement(view.Scripts);
                 scriptElement.ScriptLocation = javascriptKey;
                 scriptElement.LoadMethodName = "OnMasterViewLoadedCustom";
+
                 view.Scripts.Add(scriptElement);
 
                 manager.SaveSection(imagesBackend.Section, true);
