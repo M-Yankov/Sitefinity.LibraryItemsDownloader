@@ -9,6 +9,7 @@ using Telerik.Sitefinity.Modules.Libraries;
 using Telerik.Sitefinity.Utilities.Zip;
 using Telerik.Sitefinity.Libraries.Model;
 using Telerik.Sitefinity.Configuration;
+using Telerik.Sitefinity.GenericContent.Model;
 
 namespace Sitefinity.LibraryItemsDownloader.Custom.Services
 {
@@ -20,24 +21,44 @@ namespace Sitefinity.LibraryItemsDownloader.Custom.Services
 
         public string DownloadImages(string[] imageIds)
         {
+            LibrariesManager libraryManager = this.GetLibrariesManager();
+            string result = this.GetDownloadableContent<Image>(libraryManager, imageIds);
+            return result;
+        }
+
+        public string DownloadVideos(string[] videoIds)
+        {
+            LibrariesManager libraryManager = this.GetLibrariesManager();
+            string result = this.GetDownloadableContent<Video>(libraryManager, videoIds);
+            return result;
+        }
+
+        public string DownloadDocuments(string[] documentIds)
+        {
+            LibrariesManager libraryManager = this.GetLibrariesManager();
+            string result = this.GetDownloadableContent<Document>(libraryManager, documentIds);
+            return result;
+        }
+
+        public string GetDownloadableContent<TContent>(LibrariesManager libraryManager, string[] contentItemIds) where TContent : MediaContent
+        {
             string result = string.Empty;
-            var libraryManager = LibrariesManager.GetManager();
 
             using (MemoryStream memoryStream = new MemoryStream())
             using (ZipFile zipFiles = new ZipFile())
             {
-                foreach (string id in imageIds ?? Enumerable.Empty<string>())
+                foreach (string id in contentItemIds ?? Enumerable.Empty<string>())
                 {
-                    Guid imageId;
-                    if (Guid.TryParse(id, out imageId))
+                    Guid itemId;
+                    if (Guid.TryParse(id, out itemId))
                     {
-                        Image image = libraryManager.GetImage(imageId);
-                        if (image != null)
+                        TContent contentItem = libraryManager.GetItem(typeof(TContent), itemId) as TContent;
+                        if (contentItem != null)
                         {
-                            Image liveImage = libraryManager.Provider.GetLiveBase<Image>(image);
-                            Stream stream = libraryManager.Download(liveImage);
-                            string imageName = Path.GetFileName(image.FilePath);
-                            zipFiles.AddFileStream(imageName, string.Empty, stream);
+                            TContent contentItemLiveVersion = libraryManager.Provider.GetLiveBase<TContent>(contentItem);
+                            Stream downloadStream = libraryManager.Download(contentItemLiveVersion);
+                            string contentItemName = Path.GetFileName(contentItem.FilePath);
+                            zipFiles.AddFileStream(contentItemName, string.Empty, downloadStream);
                         }
                     }
                 }
@@ -49,6 +70,12 @@ namespace Sitefinity.LibraryItemsDownloader.Custom.Services
             }
 
             return result;
+        }
+
+        public virtual LibrariesManager GetLibrariesManager()
+        {
+            LibrariesManager libraryManager = LibrariesManager.GetManager();
+            return libraryManager;
         }
     }
 }

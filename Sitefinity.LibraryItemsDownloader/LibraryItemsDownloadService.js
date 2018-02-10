@@ -1,7 +1,20 @@
 ﻿var my_binder;
+var supportedCommands = {
+    'DownloadSelectedImages': {
+        downloadLink: 'DownloadImages',
+        zipFileName: 'Images'
+    },
+    'DownloadSelectedDocuments': {
+        downloadLink: 'DownloadDocuments',
+        zipFileName: 'Documents'
+    },
+    'DownloadSelectedVideos': {
+        downloadLink: 'DownloadVideos',
+        zipFileName: 'Videos'
+    }
+}
 
 console.log('External JS Loaded');
-
 
 // called by the MasterGridView when it is loaded
 // the sender here is MasterGridView
@@ -10,13 +23,13 @@ function OnMasterViewLoadedCustom(sender, args) {
     my_binder = sender.get_binder();
 
     var itemsGrid = sender.get_currentItemsList();
-    itemsGrid.add_command(onMyCommand);
+    itemsGrid.add_command(downloadSelectedImages);
 }
 
-function onMyCommand(sender, args) {
+function downloadSelectedImages(sender, args) {
 
     var commandName = args.get_commandName();
-    if (commandName !== 'DownloadSelectedImages') {
+    if (!supportedCommands[commandName]) {
         return;
     }
 
@@ -25,10 +38,10 @@ function onMyCommand(sender, args) {
         alert('Please select items!');
     }
 
+    var zipFileName = supportedCommands[commandName].zipFileName;
 
     var dataItem = sender.get_dataItem();
-    var zipFileName = 'Images';
-    if (dataItem !== null) {
+    if (!!dataItem && !!dataItem.LibraryTitle) {
         zipFileName = dataItem.LibraryTitle;
     }
     var imageIds = items.map(function (item) {
@@ -36,22 +49,23 @@ function onMyCommand(sender, args) {
     });
 
     var data = JSON.stringify(imageIds);
+    var url = '/LibrariesService/' + supportedCommands[commandName].downloadLink;
     $.ajax({
         method: 'POST',
-        url: '/LibrariesService/DownloadImages',
+        url: url,
         data: data,
         dataType: "json",
         contentType: "application/json",
         success: function (data) {
-            suc(data, zipFileName);
+            downloadFile(data, zipFileName);
         },
         error: function (e) {
             console.error(e);
         }
     });
-
 }
 
+// https://stackoverflow.com/questions/35038884/download-file-from-bytes-in-javascript/37340749#37340749
 function base64ToArrayBuffer(base64) {
     var binaryString = window.atob(base64);
     var binaryLen = binaryString.length;
@@ -63,7 +77,7 @@ function base64ToArrayBuffer(base64) {
     return bytes;
 }
 
-function suc(byteArray, zipFileName) {
+function downloadFile(byteArray, zipFileName) {
     var data = base64ToArrayBuffer(byteArray);
     var blob = new Blob([data], { type: 'application/zip' });
     var link = document.createElement('a');
@@ -71,9 +85,4 @@ function suc(byteArray, zipFileName) {
     var fileName = zipFileName + '.zip';
     link.download = fileName;
     link.click();
-}
-
-function onMyItemCommand(sender, args) {
-    console.log('OnItemCommand');
-    return true;
 }
