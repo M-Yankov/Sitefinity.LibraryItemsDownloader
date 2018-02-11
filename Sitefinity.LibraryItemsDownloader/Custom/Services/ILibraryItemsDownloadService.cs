@@ -1,5 +1,7 @@
 ﻿using System.ServiceModel;
 using System.ServiceModel.Web;
+using Telerik.Sitefinity.Libraries.Model;
+using Telerik.Sitefinity.Modules.Libraries;
 
 namespace Sitefinity.LibraryItemsDownloader.Custom.Services
 {
@@ -17,5 +19,9 @@ namespace Sitefinity.LibraryItemsDownloader.Custom.Services
         [OperationContract]
         [WebInvoke(Method = "POST", UriTemplate = "/DownloadDocuments", ResponseFormat = WebMessageFormat.Json, RequestFormat = WebMessageFormat.Json)]
         string DownloadDocuments(string[] documentIds);
+
+        string GetDownloadableContent<TContent>(LibrariesManager libraryManager, string[] contentItemIds) where TContent : MediaContent;
+
+        LibrariesManager GetLibrariesManager();
     }
 }
