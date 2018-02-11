@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.ServiceModel;
-using System.ServiceModel.Activation;
-using System.Web;
-using Telerik.Sitefinity.Modules.Libraries;
-using Telerik.Sitefinity.Utilities.Zip;
-using Telerik.Sitefinity.Libraries.Model;
-using Telerik.Sitefinity.Configuration;
-using Telerik.Sitefinity.GenericContent.Model;
-
-namespace Sitefinity.LibraryItemsDownloader.Custom.Services
+﻿namespace Sitefinity.LibraryItemsDownloader.Services
 {
+    using System;
+    using System.IO;
+    using System.Linq;
+    using System.ServiceModel;
+    using System.ServiceModel.Activation;
+    using Telerik.Sitefinity.Libraries.Model;
+    using Telerik.Sitefinity.Modules.Libraries;
+    using Telerik.Sitefinity.Utilities.Zip;
+
     [ServiceBehavior(IncludeExceptionDetailInFaults = true, InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Single)]
     [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Required)]
     public class LibraryItemsDownloadService : ILibraryItemsDownloadService

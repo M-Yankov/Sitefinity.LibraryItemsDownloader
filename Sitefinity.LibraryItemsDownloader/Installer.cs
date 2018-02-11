@@ -1,10 +1,10 @@
-﻿using Sitefinity.LibraryItemsDownloader.Custom.Services;
-using Sitefinity.LibraryItemsDownloader.Helpers;
-using System;
-using Telerik.Sitefinity.Services;
-
-namespace Sitefinity.LibraryItemsDownloader
+﻿namespace Sitefinity.LibraryItemsDownloader
 {
+    using System;
+    using Sitefinity.LibraryItemsDownloader.Helpers;
+    using Sitefinity.LibraryItemsDownloader.Services;
+    using Telerik.Sitefinity.Services;
+
     public class Installer
     {
         public static void PreApplicationStart()
