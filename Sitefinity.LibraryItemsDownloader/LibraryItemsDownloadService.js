@@ -1,4 +1,7 @@
 ﻿var my_binder;
+var masterViewElement;
+var loadingElementSelector = '.RadAjax'; 
+
 var supportedCommands = {
     'DownloadSelectedImages': {
         downloadLink: 'DownloadImages',
@@ -21,9 +24,19 @@ console.log('External JS Loaded');
 function OnMasterViewLoadedCustom(sender, args) {
 
     my_binder = sender.get_binder();
+    masterViewElement = sender.get_element();
 
     var itemsGrid = sender.get_currentItemsList();
     itemsGrid.add_command(downloadSelectedImages);
+
+}
+
+function showLoading() {
+    $(masterViewElement).find(loadingElementSelector).show();
+}
+
+function hideLoading() {
+    $(masterViewElement).find(loadingElementSelector).hide();
 }
 
 function downloadSelectedImages(sender, args) {
@@ -48,6 +61,7 @@ function downloadSelectedImages(sender, args) {
         return item.Id;
     });
 
+    showLoading();
     var data = JSON.stringify(imageIds);
     var url = '/LibrariesService/' + supportedCommands[commandName].downloadLink;
     $.ajax({
@@ -61,6 +75,10 @@ function downloadSelectedImages(sender, args) {
         },
         error: function (e) {
             console.error(e);
+        },
+        complete: function (e) {
+            hideLoading();
+            my_binder.clearSelection();
         }
     });
 }

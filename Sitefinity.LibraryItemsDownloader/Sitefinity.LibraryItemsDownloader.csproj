@@ -37,7 +37,8 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>YankovAssemblySign.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <DelaySign>false</DelaySign>
@@ -70,17 +71,15 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="LibraryItemsDownloadService.js" />
-    <Compile Include="Custom\Services\ILibraryItemsDownloadService.cs" />
-    <Compile Include="Custom\Services\LibraryItemsDownloadService.cs" />
+    <Compile Include="Helpers\IInstallationsHelper.cs" />
+    <Compile Include="Services\ILibraryItemsDownloadService.cs" />
+    <Compile Include="Services\LibraryItemsDownloadService.cs" />
     <Compile Include="Helpers\InstallationsHelper.cs" />
     <Compile Include="Installer.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="bin\keyPair.snk" />
-    <None Include="YankovAssemblySign.snk" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,10 +1,10 @@
-﻿using System.ServiceModel;
-using System.ServiceModel.Web;
-using Telerik.Sitefinity.Libraries.Model;
-using Telerik.Sitefinity.Modules.Libraries;
-
-namespace Sitefinity.LibraryItemsDownloader.Custom.Services
+﻿namespace Sitefinity.LibraryItemsDownloader.Services
 {
+    using System.ServiceModel;
+    using System.ServiceModel.Web;
+    using Telerik.Sitefinity.Libraries.Model;
+    using Telerik.Sitefinity.Modules.Libraries;
+
     [ServiceContract]
     public interface ILibraryItemsDownloadService
     {
