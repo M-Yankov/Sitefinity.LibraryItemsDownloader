@@ -1,21 +1,19 @@
 ﻿// Telerik.Sitefinity.Web.UI.RadListViewBinder
 // Telerik.Sitefinity.Web.UI.RadGridBinder 
 var my_binder;
+var zipFileName;
 var masterViewElement;
 var loadingElementSelector = '.RadAjax'; 
 
 var supportedCommands = {
     'DownloadSelectedImages': {
         downloadLink: 'DownloadImages',
-        zipFileName: 'Images'
     },
     'DownloadSelectedDocuments': {
         downloadLink: 'DownloadDocuments',
-        zipFileName: 'Documents'
     },
     'DownloadSelectedVideos': {
         downloadLink: 'DownloadVideos',
-        zipFileName: 'Videos'
     }
 }
 
@@ -27,10 +25,10 @@ function OnMasterViewLoadedCustom(sender, args) {
 
     my_binder = sender.get_binder();
     masterViewElement = sender.get_element();
+    zipFileName = sender.get_titleText().trim();
 
     var itemsGrid = sender.get_currentItemsList();
     itemsGrid.add_command(downloadSelectedImages);
-
 }
 
 function showLoading() {
@@ -49,18 +47,12 @@ function downloadSelectedImages(sender, args) {
         return;
     }
 
-    var items = my_binder.get_selectedItems();
-    if (!items || items.length < 1) {
+    var selectedItems = my_binder.get_selectedItems();
+    if (!selectedItems || selectedItems.length < 1) {
         alert('Please select items!');
     }
 
-    var zipFileName = supportedCommands[commandName].zipFileName;
-
-    var dataItem = sender.get_dataItem();
-    if (!!dataItem && !!dataItem.LibraryTitle) {
-        zipFileName = dataItem.LibraryTitle;
-    }
-    var imageIds = items.map(function (item) {
+    var imageIds = selectedItems.map(function (item) {
         return item.Id;
     });
 
