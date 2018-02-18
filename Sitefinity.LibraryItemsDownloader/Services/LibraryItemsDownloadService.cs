@@ -8,6 +8,7 @@
     using Telerik.Sitefinity.Libraries.Model;
     using Telerik.Sitefinity.Modules.Libraries;
     using Telerik.Sitefinity.Utilities.Zip;
+    using Telerik.Sitefinity.Web.Services;
 
     [ServiceBehavior(IncludeExceptionDetailInFaults = true, InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Single)]
     [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Required)]
@@ -38,6 +39,8 @@
 
         public string GetDownloadableContent<TContent>(LibrariesManager libraryManager, string[] contentItemIds) where TContent : MediaContent
         {
+            this.VerifyUserHasPermissionsToAceessService();
+
             string result = string.Empty;
 
             using (MemoryStream memoryStream = new MemoryStream())
@@ -72,6 +75,11 @@
         {
             LibrariesManager libraryManager = LibrariesManager.GetManager();
             return libraryManager;
+        }
+
+        public virtual void VerifyUserHasPermissionsToAceessService()
+        {
+            ServiceUtility.RequestBackendUserAuthentication();
         }
     }
 }

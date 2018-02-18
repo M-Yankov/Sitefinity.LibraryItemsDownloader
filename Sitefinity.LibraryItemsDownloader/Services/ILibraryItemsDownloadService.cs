@@ -23,5 +23,7 @@
         string GetDownloadableContent<TContent>(LibrariesManager libraryManager, string[] contentItemIds) where TContent : MediaContent;
 
         LibrariesManager GetLibrariesManager();
+
+        void VerifyUserHasPermissionsToAceessService();
     }
 }
