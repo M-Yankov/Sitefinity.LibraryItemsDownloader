@@ -28,7 +28,7 @@ function OnMasterViewLoadedCustom(sender, args) {
     zipFileName = sender.get_titleText().trim();
 
     var itemsGrid = sender.get_currentItemsList();
-    itemsGrid.add_command(downloadSelectedImages);
+    itemsGrid.add_command(downloadSelectedItems);
 }
 
 function showLoading() {
@@ -40,7 +40,7 @@ function hideLoading() {
 }
 
 ///  the sender here is Telerik.Sitefinity.Web.UI.ItemLists.ItemsList
-function downloadSelectedImages(sender, args) {
+function downloadSelectedItems(sender, args) {
 
     var commandName = args.get_commandName();
     if (!supportedCommands[commandName]) {
@@ -52,12 +52,15 @@ function downloadSelectedImages(sender, args) {
         alert('Please select items!');
     }
 
-    var imageIds = selectedItems.map(function (item) {
-        return item.Id;
+    var requestData = selectedItems.map(function (item) {
+        return {
+            Id: item.Id,
+            IsFolder: item.IsFolder
+        };
     });
 
     showLoading();
-    var data = JSON.stringify(imageIds);
+    var data = JSON.stringify(requestData);
     var url = '/LibrariesService/' + supportedCommands[commandName].downloadLink;
     $.ajax({
         method: 'POST',

@@ -72,6 +72,7 @@
   <ItemGroup>
     <EmbeddedResource Include="LibraryItemsDownloadService.js" />
     <Compile Include="Helpers\IInstallationsHelper.cs" />
+    <Compile Include="Services\Models\DownloadLibaryItemRequestModel.cs" />
     <Compile Include="Services\ILibraryItemsDownloadService.cs" />
     <Compile Include="Services\LibraryItemsDownloadService.cs" />
     <Compile Include="Helpers\InstallationsHelper.cs" />
