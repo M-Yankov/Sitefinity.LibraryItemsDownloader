@@ -6,20 +6,31 @@
     using System.Linq;
     using System.ServiceModel;
     using System.ServiceModel.Activation;
+    using Sitefinity.LibraryItemsDownloader.Helpers;
+    using Sitefinity.LibraryItemsDownloader.Services.Models;
+    using Telerik.Sitefinity;
+    using Telerik.Sitefinity.GenericContent.Model;
     using Telerik.Sitefinity.Libraries.Model;
     using Telerik.Sitefinity.Modules.Libraries;
     using Telerik.Sitefinity.Utilities.Zip;
     using Telerik.Sitefinity.Web.Services;
 
-    using Sitefinity.LibraryItemsDownloader.Services.Models;
-    using Telerik.Sitefinity;
-    using Telerik.Sitefinity.GenericContent.Model;
-
     [ServiceBehavior(IncludeExceptionDetailInFaults = true, InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Single)]
     [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Required)]
     public class LibraryItemsDownloadService : ILibraryItemsDownloadService
     {
+        private readonly IUtilityHelper utilityHelper;
         public const string WebServicePath = "LibrariesService";
+
+        public LibraryItemsDownloadService()
+            : this(new UtilityHelper())
+        {
+        }
+
+        public LibraryItemsDownloadService(IUtilityHelper helper)
+        {
+            this.utilityHelper = helper;
+        }
 
         public string DownloadImages(IEnumerable<DownloadLibaryItemRequestModel> imagesRequest)
         {
@@ -102,7 +113,8 @@
         public void SaveLibraryItemsToStreamRecursively<TContent>(LibrariesManager librariesManager, IFolder folder, ZipFile zipStream, string directoryPathInArchive) where TContent : MediaContent
         {
             IEnumerable<IFolder> innerFolders = librariesManager.GetChildFolders(folder).ToList();
-            string innerFolderPathName = Path.Combine(directoryPathInArchive, folder.Title.Trim());
+            string titleSaveName = this.utilityHelper.ReplaceInvlaidCharacters(folder.Title.Trim());
+            string innerFolderPathName = Path.Combine(directoryPathInArchive, titleSaveName);
             if (innerFolders != null && innerFolders.Any())
             {
                 foreach (IFolder innerFolder in innerFolders)

@@ -62,7 +62,7 @@
 
             if (!view.Scripts.ContainsKey(javascriptKey))
             {
-                var scriptElement = new ClientScriptElement(view.Scripts);
+                ClientScriptElement scriptElement = new ClientScriptElement(view.Scripts);
                 scriptElement.ScriptLocation = javascriptKey;
                 scriptElement.LoadMethodName = ClientMasterViewLoadMethodName;
 
@@ -97,10 +97,11 @@
 
         public string GetJavaScriptQualifiedNameKey(Assembly libraryItemsDownloaderAssembly, string scriptFileName)
         {
-            var fullNamespaceJavaScriptFile = libraryItemsDownloaderAssembly.GetManifestResourceNames().FirstOrDefault(fileName => fileName.EndsWith(scriptFileName));
+            string fullNamespaceJavaScriptFile = libraryItemsDownloaderAssembly.GetManifestResourceNames().FirstOrDefault(fileName => fileName.EndsWith(scriptFileName));
             if (fullNamespaceJavaScriptFile == null)
             {
-                throw new NullReferenceException("Cannot find embedded file LibraryItemsDownloadService.js");
+                string exceptionMessage = string.Format("Cannot find embedded file {0}", scriptFileName);
+                throw new NullReferenceException(exceptionMessage);
             }
 
             string javaScriptQualifiedNameKey = Assembly.CreateQualifiedName(libraryItemsDownloaderAssembly.FullName, fullNamespaceJavaScriptFile);

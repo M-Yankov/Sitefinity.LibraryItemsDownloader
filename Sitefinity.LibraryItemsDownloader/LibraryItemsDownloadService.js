@@ -7,15 +7,15 @@ var loadingElementSelector = '.RadAjax';
 
 var supportedCommands = {
     'DownloadSelectedImages': {
-        downloadLink: 'DownloadImages',
+        downloadLink: 'DownloadImages'
     },
     'DownloadSelectedDocuments': {
-        downloadLink: 'DownloadDocuments',
+        downloadLink: 'DownloadDocuments'
     },
     'DownloadSelectedVideos': {
-        downloadLink: 'DownloadVideos',
+        downloadLink: 'DownloadVideos'
     }
-}
+};
 
 console.log('External JS Loaded');
 
@@ -26,6 +26,7 @@ function OnMasterViewLoadedCustom(sender, args) {
     my_binder = sender.get_binder();
     masterViewElement = sender.get_element();
     zipFileName = sender.get_titleText().trim();
+    zipFileName = decodeLibraryTitle(zipFileName);
 
     var itemsGrid = sender.get_currentItemsList();
     itemsGrid.add_command(downloadSelectedItems);
@@ -87,6 +88,12 @@ function deselectLibraryItems() {
     } else if (Telerik.Sitefinity.Web.UI.RadGridBinder && my_binder instanceof Telerik.Sitefinity.Web.UI.RadGridBinder ) {
         my_binder.clearSelection();
     } 
+}
+
+function decodeLibraryTitle(title) {
+    var textArea = document.createElement('textarea');
+    textArea.innerHTML = title;
+    return textArea.value;
 }
 
 // https://stackoverflow.com/questions/35038884/download-file-from-bytes-in-javascript/37340749#37340749
