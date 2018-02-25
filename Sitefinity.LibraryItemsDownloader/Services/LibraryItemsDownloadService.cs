@@ -9,6 +9,7 @@
     using Sitefinity.LibraryItemsDownloader.Helpers;
     using Sitefinity.LibraryItemsDownloader.Services.Models;
     using Telerik.Sitefinity;
+    using Telerik.Sitefinity.Abstractions;
     using Telerik.Sitefinity.GenericContent.Model;
     using Telerik.Sitefinity.Libraries.Model;
     using Telerik.Sitefinity.Modules.Libraries;
@@ -20,6 +21,7 @@
     public class LibraryItemsDownloadService : ILibraryItemsDownloadService
     {
         public const string WebServicePath = "LibrariesService";
+        private const string ExceptionMessageFormat = "{0}{1}Item title: \"{2}\", id: {3}";
         private readonly IUtilityHelper utilityHelper;
 
         public LibraryItemsDownloadService()
@@ -146,9 +148,26 @@
                 if (contentItem != null)
                 {
                     TContent contentItemLiveVersion = librariesManager.Provider.GetLiveBase<TContent>(contentItem);
-                    Stream downloadStream = librariesManager.Download(contentItemLiveVersion);
-                    string contentItemName = Path.GetFileName(contentItem.FilePath);
 
+                    Stream downloadStream = null;
+                    try
+                    {
+                        downloadStream = librariesManager.Download(contentItemLiveVersion);
+                    }
+                    catch (Exception exception)
+                    {
+                         string logMessage = string.Format(
+                             ExceptionMessageFormat,
+                             exception.Message,
+                             Environment.NewLine,
+                             contentItemLiveVersion.Title.ToString(),
+                             contentItemLiveVersion.Id);
+
+                        Log.Write(logMessage, ConfigurationPolicy.ErrorLog);
+                        continue;
+                    }
+
+                    string contentItemName = Path.GetFileName(contentItem.FilePath);
                     zipStream.AddFileStream(contentItemName, directoryPathInArchive, downloadStream);
                 }
             }
