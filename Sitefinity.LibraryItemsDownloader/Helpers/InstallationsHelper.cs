@@ -24,7 +24,11 @@
         private const string DownloadSelectedVideosCommandName = "DownloadSelectedVideos";
         private const string DownloadSelectedDocumentsCommandName = "DownloadSelectedDocuments";
         private const string ClientMasterViewLoadMethodName = "OnMasterViewLoadedCustom";
+#if DEBUG
         private const string JavascriptFileName = "LibraryItemsDownloadService.js";
+#else
+        private const string JavascriptFileName = "LibraryItemsDownloadService.min.js";
+#endif
 
         public void Initialize()
         {

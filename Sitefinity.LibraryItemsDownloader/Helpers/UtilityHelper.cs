@@ -8,7 +8,7 @@
     public class UtilityHelper : IUtilityHelper
     {
         private const string DefaultReplaceCharacter = "_";
-        HashSet<char> reservedSymbols = null;
+        private HashSet<char> reservedSymbols = null;
 
         public UtilityHelper()
         {
