@@ -9,9 +9,9 @@ using Sitefinity.LibraryItemsDownloader;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Sitefinity.LibraryItemsDownloader")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A library that extends the Sitefinity backend and enables downloading multiple images/videos/documents.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("https://github.com/M-Yankov/")]
 [assembly: AssemblyProduct("Sitefinity.LibraryItemsDownloader")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
