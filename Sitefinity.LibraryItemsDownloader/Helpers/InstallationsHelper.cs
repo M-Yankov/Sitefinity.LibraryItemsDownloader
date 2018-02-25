@@ -1,6 +1,7 @@
 ﻿namespace Sitefinity.LibraryItemsDownloader.Helpers
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using System.Web.UI;
@@ -64,20 +65,14 @@
             Assembly itemsDownloaderAssembly = typeof(Installer).Assembly;
             string javascriptKey = this.GetJavaScriptQualifiedNameKey(itemsDownloaderAssembly, JavascriptFileName);
 
-            if (!view.Scripts.ContainsKey(javascriptKey))
+            if (this.AddOrUpdateScriptReference(javascriptKey, itemsDownloaderAssembly,  view.Scripts))
             {
-                ClientScriptElement scriptElement = new ClientScriptElement(view.Scripts);
-                scriptElement.ScriptLocation = javascriptKey;
-                scriptElement.LoadMethodName = ClientMasterViewLoadMethodName;
-
-                view.Scripts.Add(scriptElement);
-
                 manager.SaveSection(imagesBackend.Section, true);
             }
 
-            MasterGridViewElement masterV = view as MasterGridViewElement;
+            MasterGridViewElement masterView = view as MasterGridViewElement;
 
-            WidgetBarElement toolbarConfig = masterV.ToolbarConfig as WidgetBarElement;
+            WidgetBarElement toolbarConfig = masterView.ToolbarConfig as WidgetBarElement;
             WidgetBarSectionElement widgetBarSectionElement = toolbarConfig.Sections.OfType<WidgetBarSectionElement>().FirstOrDefault(s => s.Name == WidgetBarSectionName);
             ActionMenuWidgetElement moreActionsWidgetElement = widgetBarSectionElement.Items.OfType<ActionMenuWidgetElement>().FirstOrDefault(w => w.Name == MoreActionsWidgetName);
             CommandWidgetElement downloadSelectedImagesCommand = moreActionsWidgetElement.MenuItems.OfType<CommandWidgetElement>().FirstOrDefault(c => c.Name == commandName);
@@ -110,6 +105,48 @@
 
             string javaScriptQualifiedNameKey = Assembly.CreateQualifiedName(libraryItemsDownloaderAssembly.FullName, fullNamespaceJavaScriptFile);
             return javaScriptQualifiedNameKey;
+        }
+
+        public bool AddOrUpdateScriptReference(string configKey, Assembly currentAssembly, ConfigElementDictionary<string, ClientScriptElement> scriptsElements)
+        {
+            if (string.IsNullOrEmpty(configKey))
+            {
+                throw new NullReferenceException("Config key cannot be null or empty.");
+            }
+
+            if (currentAssembly == null)
+            {
+                throw new NullReferenceException("Assembly cannot be null.");
+            }
+
+            if (scriptsElements == null)
+            {
+                throw new NullReferenceException("The scripts elements collection cannot be empty.");
+            }
+
+            if (scriptsElements.ContainsKey(configKey))
+            {
+                return false;
+            }
+
+            AssemblyName itemsDownloaderAssemblyName = currentAssembly.GetName();
+            IEnumerable<ClientScriptElement> oldScriptRefences = scriptsElements
+                .Cast<ClientScriptElement>()
+                .Where(s => s.ScriptLocation.Contains(itemsDownloaderAssemblyName.Name))
+                .ToList();
+
+            foreach (ClientScriptElement scriptReference in oldScriptRefences)
+            {
+                scriptsElements.Remove(scriptReference);
+            }
+            
+            ClientScriptElement scriptElement = new ClientScriptElement(scriptsElements);
+            scriptElement.ScriptLocation = configKey;
+            scriptElement.LoadMethodName = ClientMasterViewLoadMethodName;
+
+            scriptsElements.Add(scriptElement);
+
+            return true;
         }
     }
 }
