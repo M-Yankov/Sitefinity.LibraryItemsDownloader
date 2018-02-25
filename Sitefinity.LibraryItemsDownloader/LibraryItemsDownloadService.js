@@ -111,11 +111,22 @@
     function downloadFile(byteArray, zipFileName) {
         var data = base64ToArrayBuffer(byteArray);
         var blob = new Blob([data], { type: 'application/zip' });
+        var fileName = zipFileName + '.zip';
+        
+        // Internet Explorer
+        if (navigator.msSaveBlob) {
+            navigator.msSaveBlob(blob, fileName);
+            return;
+        }
+
         var link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
-        var fileName = zipFileName + '.zip';
         link.download = fileName;
+
+        // For Firefox should append the link to the body 
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
     }
 
     return {
