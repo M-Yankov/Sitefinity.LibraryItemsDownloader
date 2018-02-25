@@ -19,8 +19,8 @@
     [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Required)]
     public class LibraryItemsDownloadService : ILibraryItemsDownloadService
     {
-        private readonly IUtilityHelper utilityHelper;
         public const string WebServicePath = "LibrariesService";
+        private readonly IUtilityHelper utilityHelper;
 
         public LibraryItemsDownloadService()
             : this(new UtilityHelper())
@@ -138,7 +138,7 @@
             }
         }
 
-        void SaveLibraryItemsToStream<TContent>(LibrariesManager librariesManager, IEnumerable<Guid> selectedItemIds, ZipFile zipStream, string directoryPathInArchive) where TContent : MediaContent
+        public void SaveLibraryItemsToStream<TContent>(LibrariesManager librariesManager, IEnumerable<Guid> selectedItemIds, ZipFile zipStream, string directoryPathInArchive) where TContent : MediaContent
         {
             foreach (Guid selectedId in selectedItemIds)
             {
