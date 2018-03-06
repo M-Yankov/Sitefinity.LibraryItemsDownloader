@@ -64,7 +64,7 @@
         var data = JSON.stringify(requestData);
         var url = '/LibrariesService/' + supportedCommands[commandName].downloadLink;
         $.ajax({
-            method: 'POST',
+            type: 'POST',
             url: url,
             data: data,
             dataType: "json",
