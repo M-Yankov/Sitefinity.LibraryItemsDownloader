@@ -21,7 +21,8 @@
     public class LibraryItemsDownloadService : ILibraryItemsDownloadService
     {
         public const string WebServicePath = "LibrariesService";
-        private const string ExceptionMessageFormat = "{0}{1}Item title: \"{2}\", id: {3}";
+        private const string ExceptionMessageFormat = "LibraryItemsDownloader Error: {0}{1}Item title: \"{2}\", id: {3}";
+        private const string CannotFindLiveVersionFormat = "LibraryItemsDownloader Info: Cannot find the live version of item. Title: {0}, id: {1}";
         private readonly IUtilityHelper utilityHelper;
 
         public LibraryItemsDownloadService()
@@ -149,6 +150,13 @@
                 {
                     TContent contentItemLiveVersion = librariesManager.Provider.GetLiveBase<TContent>(contentItem);
 
+                    if (contentItemLiveVersion == null)
+                    {
+                        string logMessage = string.Format(CannotFindLiveVersionFormat, contentItem.Title, contentItem.Id);
+                        Log.Write(logMessage, ConfigurationPolicy.Trace);
+                        continue;
+                    }
+
                     Stream downloadStream = null;
                     try
                     {
@@ -160,7 +168,7 @@
                              ExceptionMessageFormat,
                              exception.Message,
                              Environment.NewLine,
-                             contentItemLiveVersion.Title.ToString(),
+                             contentItemLiveVersion.Title,
                              contentItemLiveVersion.Id);
 
                         Log.Write(logMessage, ConfigurationPolicy.ErrorLog);

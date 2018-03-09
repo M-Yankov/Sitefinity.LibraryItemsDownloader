@@ -73,6 +73,7 @@
                 downloadFile(data, zipFileName);
             },
             error: function (e) {
+                console.error('LibraryItemsDownloader Error:');
                 console.error(e);
             },
             complete: function (e) {
