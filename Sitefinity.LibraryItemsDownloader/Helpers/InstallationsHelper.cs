@@ -67,7 +67,7 @@
 
             if (this.AddOrUpdateScriptReference(javascriptKey, itemsDownloaderAssembly,  view.Scripts))
             {
-                manager.SaveSection(imagesBackend.Section, true);
+                manager.SaveSection(imagesBackend.Section);
             }
 
             MasterGridViewElement masterView = view as MasterGridViewElement;
@@ -90,7 +90,7 @@
                 downloadSelectedImagesCommand.Text = commandText;
 
                 moreActionsWidgetElement.MenuItems.Add(downloadSelectedImagesCommand);
-                manager.SaveSection(imagesBackend.Section, true);
+                manager.SaveSection(imagesBackend.Section);
             }
         }
 
