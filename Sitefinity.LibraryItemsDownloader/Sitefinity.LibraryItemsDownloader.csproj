@@ -8,8 +8,9 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Sitefinity.LibraryItemsDownloader</RootNamespace>
     <AssemblyName>Sitefinity.LibraryItemsDownloader</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -57,16 +58,16 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Telerik.OpenAccess">
-      <HintPath>..\Sample\bin\Telerik.OpenAccess.dll</HintPath>
+      <HintPath>Libraries\Telerik.OpenAccess.dll</HintPath>
     </Reference>
     <Reference Include="Telerik.Sitefinity">
-      <HintPath>..\Sample\bin\Telerik.Sitefinity.dll</HintPath>
+      <HintPath>Libraries\Telerik.Sitefinity.dll</HintPath>
     </Reference>
     <Reference Include="Telerik.Sitefinity.Model">
-      <HintPath>..\Sample\bin\Telerik.Sitefinity.Model.dll</HintPath>
+      <HintPath>Libraries\Telerik.Sitefinity.Model.dll</HintPath>
     </Reference>
     <Reference Include="Telerik.Sitefinity.Utilities">
-      <HintPath>..\Sample\bin\Telerik.Sitefinity.Utilities.dll</HintPath>
+      <HintPath>Libraries\Telerik.Sitefinity.Utilities.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
