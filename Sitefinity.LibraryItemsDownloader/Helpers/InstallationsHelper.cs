@@ -126,19 +126,19 @@
 
         public virtual bool AddOrUpdateScriptReference(string configKey, Assembly currentAssembly, ConfigElementDictionary<string, ClientScriptElement> scriptsElements)
         {
-            if (string.IsNullOrEmpty(configKey))
+            if (string.IsNullOrWhiteSpace(configKey))
             {
-                throw new NullReferenceException("Config key cannot be null or empty.");
+                throw new ArgumentNullException("configKey", "Config key cannot be null or empty.");
             }
 
             if (currentAssembly == null)
             {
-                throw new NullReferenceException("Assembly cannot be null.");
+                throw new ArgumentNullException("currentAssembly", "Assembly cannot be null.");
             }
 
             if (scriptsElements == null)
             {
-                throw new NullReferenceException("The scripts elements collection cannot be empty.");
+                throw new ArgumentNullException("scriptsElements", "The scripts elements collection cannot be null.");
             }
 
             if (scriptsElements.ContainsKey(configKey))

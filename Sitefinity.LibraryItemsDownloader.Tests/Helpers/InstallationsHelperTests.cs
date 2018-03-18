@@ -26,6 +26,8 @@
         private const string DefaultParentTagName = "TestTagName";
         private const string DefaultViewName = "ImageBackendListTest";
         private const string DefaultCommandName = "JavaScript";
+        private const string ClientMasterViewLoadMethodName = "OnMasterViewLoadedCustom";
+
         private Mock<LibrariesConfig> librariesConfigMock;
         private Mock<ActionMenuWidgetElement> actionMenuWidgetMock;
         private Mock<WidgetBarSectionElement> widgetBarSectionMock;
@@ -130,8 +132,7 @@
             {
                 InstallationsHelper installationsHelper = new InstallationsHelper(null);
                 installationsHelper.ConfigureLibrarySection(null, librariesConfig.Object, null, null, null, null);
-            },
-            "Cannot find content view control: NULL related with libraries configuration.");
+            });
         }
 
         [Test]
@@ -142,8 +143,7 @@
             {
                 InstallationsHelper installationsHelper = new InstallationsHelper(null);
                 installationsHelper.ConfigureLibrarySection(null, null, testDefinitionName, null, null, null);
-            },
-            $"Cannot find content view control: {testDefinitionName} related with libraries configuration.");
+            });
         }
 
         [Test]
@@ -159,8 +159,7 @@
             {
                 InstallationsHelper installationsHelper = new InstallationsHelper(null);
                 installationsHelper.ConfigureLibrarySection(null, librariesConfig.Object, testDefinitionName, null, null, null);
-            },
-            $"Cannot find content view control: {testDefinitionName} related with libraries configuration.");
+            });
         }
         
         [Test]
@@ -174,8 +173,7 @@
             {
                 InstallationsHelper installationsHelper = new InstallationsHelper(null);
                 installationsHelper.ConfigureLibrarySection(null, librariesConfig.Object, ContentViewControls, null, null, null);
-            },
-            "Cannot find back-end view: NULL.");
+            });
         }
 
         [Test]
@@ -191,8 +189,7 @@
             {
                 InstallationsHelper installationsHelper = new InstallationsHelper(null);
                 installationsHelper.ConfigureLibrarySection(null, librariesConfig.Object, ContentViewControls, notExistingViewName, null, null);
-            },
-            $"Cannot find back-end view: {notExistingViewName}.");
+            });
         }
 
         [Test]
@@ -338,8 +335,7 @@
             Assert.Throws<NullReferenceException>(() =>
             {
                 installationsHelper.GetJavaScriptQualifiedNameKey(assemblyMock.Object, scriptFileName);
-            },
-            $"Cannot find embedded file {scriptFileName}");
+            });
         }
         
         [Test]
@@ -357,6 +353,126 @@
             string result =installationsHelper.GetJavaScriptQualifiedNameKey(assemblyMock.Object, scriptFileName);
             Assert.IsNotNull(result);
             Assert.AreEqual($"{fullNameSpacescriptFileName}, {fullName}", result);
+        }
+        #endregion
+
+        #region AddOrUpdateScriptReference Tests
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("    ")]
+        public void ExpectAddOrUpdateScriptReferenceToThrowExceptionWhenConfigKeyIsInvalid(string key)
+        {
+            InstallationsHelper installationsHelper = new InstallationsHelper(null);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                // Act & Assert
+                installationsHelper.AddOrUpdateScriptReference(key, typeof(InstallationsHelper).Assembly, new ConfigElementDictionary<string, ClientScriptElement>(this.parentSection));
+            });
+        }
+
+        [Test]
+        public void ExpectAddOrUpdateScriptReferenceToThrowExceptionWhenAssemblyParameterIsNull()
+        {
+            InstallationsHelper installationsHelper = new InstallationsHelper(null);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                // Act & Assert
+                installationsHelper.AddOrUpdateScriptReference("ConfigurationKey", null, new ConfigElementDictionary<string, ClientScriptElement>(this.parentSection));
+            });
+        }
+
+        [Test]
+        public void ExpectAddOrUpdateScriptReferenceToThrowExceptionWhenDictionaryParameterIsNull()
+        {
+            InstallationsHelper installationsHelper = new InstallationsHelper(null);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                // Act & Assert
+                installationsHelper.AddOrUpdateScriptReference("ConfigurationKey", typeof(InstallationsHelper).Assembly, null);
+            });
+        }
+
+        [Test]
+        public void ExpectAddOrUpdateScriptReferenceToAddScriptReferenceWithoutRemove()
+        {
+            // Arrange
+            InstallationsHelper installationsHelper = new InstallationsHelper(null);
+            Mock<AssemblyStub> assemblyMock = new Mock<AssemblyStub>();
+            AssemblyName assemblyNameTest = new AssemblyName("Downloader");
+
+            assemblyMock
+                .Setup(mock => mock.GetName())
+                .Returns(assemblyNameTest);
+
+            ConfigElementDictionary<string, ClientScriptElement> scriptElements = new ConfigElementDictionary<string, ClientScriptElement>(this.parentSection);
+
+            string configurationKey = "ConfigurationKey";
+            // Act
+            bool shoudSaveSection = installationsHelper.AddOrUpdateScriptReference(configurationKey, assemblyMock.Object, scriptElements);
+
+            // Assert
+            Assert.IsTrue(shoudSaveSection);
+            Assert.AreEqual(1, scriptElements.Count);
+            Assert.AreEqual(configurationKey, scriptElements[configurationKey].ScriptLocation);
+            Assert.AreEqual(ClientMasterViewLoadMethodName, scriptElements[configurationKey].LoadMethodName);
+        }
+
+        [Test]
+        public void ExpectAddOrUpdateScriptReferenceToUpdateTheReferenceCorrectly()
+        {
+            // Arrange
+            InstallationsHelper installationsHelper = new InstallationsHelper(null);
+            Mock<AssemblyStub> assemblyMock = new Mock<AssemblyStub>();
+            string downloaderAssemblyName = "Downloader";
+            AssemblyName assemblyNameTest = new AssemblyName(downloaderAssemblyName);
+
+            assemblyMock
+                .Setup(mock => mock.GetName())
+                .Returns(assemblyNameTest);
+
+            string oldVersion = $"JavaScriptFileName.js, {downloaderAssemblyName}, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+            string newVersion = $"JavaScriptFileName.js, {downloaderAssemblyName}, Version=1.0.0.5, Culture=neutral, PublicKeyToken=null";
+            ConfigElementDictionary<string, ClientScriptElement> scriptElements = new ConfigElementDictionary<string, ClientScriptElement>(this.parentSection);
+            ClientScriptElement scriptElement = new ClientScriptElement(scriptElements);
+            scriptElement.ScriptLocation = oldVersion;
+            scriptElement.LoadMethodName = ClientMasterViewLoadMethodName;
+            scriptElements.Add(scriptElement);
+
+            // Act
+            bool shoudSaveSection = installationsHelper.AddOrUpdateScriptReference(newVersion, assemblyMock.Object, scriptElements);
+
+            // Assert
+            Assert.IsTrue(shoudSaveSection);
+            Assert.AreEqual(1, scriptElements.Count);
+            Assert.AreEqual(newVersion, scriptElements[newVersion].ScriptLocation);
+            Assert.AreEqual(ClientMasterViewLoadMethodName, scriptElements[newVersion].LoadMethodName);
+        }
+
+        [Test]
+        public void ExpectAddOrUpdateScriptReferenceToReturnFalseWhenTheScriptReferenceAlreadyExist()
+        {
+            // Arrange
+            InstallationsHelper installationsHelper = new InstallationsHelper(null);
+            Mock<AssemblyStub> assemblyMock = new Mock<AssemblyStub>();
+            string downloaderAssemblyName = "Downloader";
+            AssemblyName assemblyNameTest = new AssemblyName(downloaderAssemblyName);
+
+            assemblyMock
+                .Setup(mock => mock.GetName())
+                .Returns(assemblyNameTest);
+
+            string javascriptPath = $"JavaScriptFileName.js, {downloaderAssemblyName}, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+            ConfigElementDictionary<string, ClientScriptElement> scriptElements = new ConfigElementDictionary<string, ClientScriptElement>(this.parentSection);
+            ClientScriptElement scriptElement = new ClientScriptElement(scriptElements);
+            scriptElement.ScriptLocation = javascriptPath;
+            scriptElement.LoadMethodName = ClientMasterViewLoadMethodName;
+            scriptElements.Add(scriptElement);
+
+            // Act
+            bool shoudSaveSection = installationsHelper.AddOrUpdateScriptReference(javascriptPath, assemblyMock.Object, scriptElements);
+
+            // Assert
+            Assert.IsFalse(shoudSaveSection);
         }
         #endregion
     }
