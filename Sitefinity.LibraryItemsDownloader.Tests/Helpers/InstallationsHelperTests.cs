@@ -1,23 +1,18 @@
 ﻿namespace Sitefinity.LibraryItemsDownloader.Tests.Helpers
 {
-    
-    using NUnit.Framework;
-    using Moq;
-    using Sitefinity;
-    using Telerik.Sitefinity.Configuration;
-    using Telerik.Sitefinity.Modules.Libraries.Configuration;
-    using Sitefinity.LibraryItemsDownloader.Helpers;
-    using Telerik.Sitefinity.Data;
-    using System.Linq.Expressions;
     using System;
-    using Telerik.Sitefinity.Web.UI.ContentUI.Config;
-    using System.Collections.Generic;
+    using System.Linq.Expressions;
     using System.Reflection;
-
-    using System.Configuration;
-    using System.ComponentModel;
-    using Telerik.Sitefinity.Web.UI.ContentUI.Views.Backend.Master.Config;
+    using Moq;
+    using NUnit.Framework;
+    using Sitefinity.LibraryItemsDownloader.Helpers;
+    using Sitefinity.LibraryItemsDownloader.Tests.Stubs;
+    using Telerik.Sitefinity.Configuration;
+    using Telerik.Sitefinity.Data;
+    using Telerik.Sitefinity.Modules.Libraries.Configuration;
     using Telerik.Sitefinity.Web.UI.Backend.Elements.Config;
+    using Telerik.Sitefinity.Web.UI.ContentUI.Config;
+    using Telerik.Sitefinity.Web.UI.ContentUI.Views.Backend.Master.Config;
 
     [TestFixture]
     public class InstallationsHelperTests
@@ -475,30 +470,5 @@
             Assert.IsFalse(shoudSaveSection);
         }
         #endregion
-    }
-
-    public class ConfigElementListStub<TElement> : ConfigElementList<TElement> where TElement : ConfigElement
-    {
-        public ConfigElementListStub(ConfigElement parent) : base(parent)
-        {
-        }
-
-        public override void AddLinkedElement(object key, string path, string moduleName = null)
-        {
-            // Get element From Dictionary 
-            TElement element = (TElement)this.GetElementByKey(key.ToString());
-
-            ConfigElementItem<TElement> configElement  = new ConfigElementItem<TElement>(key.ToString(), element);
-            (this.Items as List<ConfigElementItem<TElement>>).Add(configElement);
-        }
-
-        public void InsertInDictionary(IConfigElementItem item, string key)
-        {
-            this.OnItemInserted(item, key);
-        }
-    }
-
-    public class AssemblyStub : Assembly
-    {
     }
 }

@@ -72,6 +72,8 @@
     <Compile Include="Helpers\InstallationsHelperTests.cs" />
     <Compile Include="Helpers\UtilityHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Stubs\AssemblyStub.cs" />
+    <Compile Include="Stubs\ConfigElementListStub.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -82,6 +84,7 @@
       <Name>Sitefinity.LibraryItemsDownloader</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
