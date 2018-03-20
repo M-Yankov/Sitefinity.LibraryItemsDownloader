@@ -74,7 +74,9 @@
     <Compile Include="Helpers\ConfigManagerHelper.cs" />
     <Compile Include="Helpers\IConfigManagerHelper.cs" />
     <Compile Include="Helpers\IInstallationsHelper.cs" />
+    <Compile Include="Helpers\ILibraryManagerHelper.cs" />
     <Compile Include="Helpers\IUtilityHelper.cs" />
+    <Compile Include="Helpers\LibraryManagerHelper.cs" />
     <Compile Include="Helpers\UtilityHelper.cs" />
     <Compile Include="Services\Models\DownloadLibaryItemRequestModel.cs" />
     <Compile Include="Services\ILibraryItemsDownloadService.cs" />

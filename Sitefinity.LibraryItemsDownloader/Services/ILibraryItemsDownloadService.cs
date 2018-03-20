@@ -5,7 +5,6 @@
     using System.ServiceModel.Web;
     using Sitefinity.LibraryItemsDownloader.Services.Models;
     using Telerik.Sitefinity.Libraries.Model;
-    using Telerik.Sitefinity.Modules.Libraries;
 
     [ServiceContract]
     public interface ILibraryItemsDownloadService
@@ -22,9 +21,7 @@
         [WebInvoke(Method = "POST", UriTemplate = "/DownloadDocuments", ResponseFormat = WebMessageFormat.Json, RequestFormat = WebMessageFormat.Json)]
         string DownloadDocuments(IEnumerable<DownloadLibaryItemRequestModel> imagesRequest);
 
-        string GetDownloadableContent<TContent>(LibrariesManager libraryManager, IEnumerable<DownloadLibaryItemRequestModel> imagesRequest) where TContent : MediaContent;
-
-        LibrariesManager GetLibrariesManager();
+        string GetDownloadableContent<TContent>(IEnumerable<DownloadLibaryItemRequestModel> imagesRequest) where TContent : MediaContent;
 
         void VerifyUserHasPermissionsToAceessService();
     }
