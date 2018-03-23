@@ -20,6 +20,7 @@ using Telerik.Sitefinity.Utilities.Zip;
 using Sitefinity.LibraryItemsDownloader.Helpers;
 using System.IO;
 using Telerik.Sitefinity;
+using Telerik.Sitefinity.GenericContent.Model;
 
 namespace Sitefinity.LibraryItemsDownloader.Tests.Services
 {
@@ -35,6 +36,10 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
         public void Initialize()
         {
             Mock<IUtilityHelper> utilityHelperMock = new Mock<IUtilityHelper>();
+            utilityHelperMock
+                .Setup(helper => helper.ReplaceInvlaidCharacters(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns<string, string>((text, replaceChar) => text);
+
             this.managerHelper = new Mock<ILibraryManagerHelper>();
 
             this.libraryItemsDownloadService = new Mock<LibraryItemsDownloadService>(utilityHelperMock.Object, this.managerHelper.Object);
@@ -205,19 +210,193 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
         [Test]
         public void ExpectGetDownloadableContentToSaveSelectedFoldersOnly()
         {
+            // Arrange
+            List<DownloadLibaryItemRequestModel> guids = new List<DownloadLibaryItemRequestModel>();
+            guids.Add(new DownloadLibaryItemRequestModel() { Id = "55DDA8C6-4270-4092-8196-BF62631FB97A", IsFolder = true });
+            guids.Add(new DownloadLibaryItemRequestModel() { Id = "55DDA8C6-4270-4092-8196-BF62631FB97B", IsFolder = true });
 
+            FileZipModel testFileFolderZip = new FileZipModel("TestDataFile", "FileName.txt", "RootFolder");
+            FileZipModel testFileInFolderZip = new FileZipModel("var a = 5;", "Documentation.pdf", "Categories");
+
+            Mock<IFolder> folderMock = new Mock<IFolder>();
+            this.managerHelper
+                .Setup(helper => helper.GetFolder(It.IsAny<Guid>()))
+                .Returns(folderMock.Object);
+
+            int notFolderItemsCount = guids.Count(model => !model.IsFolder);
+
+            this.libraryItemsDownloadService
+                .Setup(this.GetSaveLibraryItemsToStreamMethodExpressionWithListFilter<Document>(notFolderItemsCount))
+                .Verifiable();
+
+            int calls = 0;
+
+            this.libraryItemsDownloadService
+                .Setup(this.GetSaveLibraryItemsToStreamRecursively<Document>())
+                .Callback<IFolder, ZipFile, string>((folder, zipStream, directory) =>
+                {
+                    calls++;
+                    switch (calls)
+                    {
+                        case 1:
+                            ZipEntry zipEntry = zipStream.AddFileFromString(testFileFolderZip.FileNameWithExtension, testFileFolderZip.DirectoryInZip, testFileFolderZip.Content);
+                            testFileFolderZip.LastModified = zipEntry.LastModified;
+                            break;
+                        case 2:
+                            ZipEntry zipEntryFolder = zipStream.AddFileFromString(testFileInFolderZip.FileNameWithExtension, testFileInFolderZip.DirectoryInZip, testFileInFolderZip.Content);
+                            testFileInFolderZip.LastModified = zipEntryFolder.LastModified;
+                            break;
+                        default:
+                            break;
+                    }
+                });
+
+            // Act
+            string result = this.libraryItemsDownloadService.Object.GetDownloadableContent<Document>(guids);
+
+            // Assert
+            this.libraryItemsDownloadService
+                .Verify(this.GetSaveLibraryItemsToStreamMethodExpressionWithListFilter<Document>(notFolderItemsCount), Times.Once());
+
+            this.libraryItemsDownloadService
+                .Verify(this.GetSaveLibraryItemsToStreamRecursively<Document>(), Times.Exactly(2));
+
+            string expectedData = this.GetTestZipStreamBytesAsText(testFileFolderZip, testFileInFolderZip);
+
+            Assert.AreEqual(expectedData, result);
         }
 
         [Test]
-        public void ExpectGetDownloadableContentTo_WellIDoNotKnowWhatToExpect_WhenOnlyFoldersAreSelectedButTheyDoNoHaveAnything()
+        public void ExpectGetDownloadableContentToReturnemptyZipArchiveWhenHelperCannotFindTheFolder()
         {
+            // Arrange
+            List<DownloadLibaryItemRequestModel> guids = new List<DownloadLibaryItemRequestModel>();
+            guids.Add(new DownloadLibaryItemRequestModel() { Id = "55DDA8C6-4270-4092-8196-BF62631FB97A", IsFolder = true });
+            guids.Add(new DownloadLibaryItemRequestModel() { Id = "55DDA8C6-4270-4092-8196-BF62631FB97B", IsFolder = true });
 
+            this.managerHelper
+                .Setup(helper => helper.GetFolder(It.IsAny<Guid>()))
+                .Returns<IFolder>(null);
+
+            int notFolderItemsCount = guids.Count(model => !model.IsFolder);
+
+            this.libraryItemsDownloadService
+                .Setup(this.GetSaveLibraryItemsToStreamMethodExpressionWithListFilter<Document>(notFolderItemsCount))
+                .Verifiable();
+
+            this.libraryItemsDownloadService
+                .Setup(this.GetSaveLibraryItemsToStreamRecursively<Document>())
+                .Verifiable();
+
+            // Act
+            string result = this.libraryItemsDownloadService.Object.GetDownloadableContent<Document>(guids);
+
+            // Assert
+            this.libraryItemsDownloadService
+                .Verify(this.GetSaveLibraryItemsToStreamMethodExpressionWithListFilter<Document>(notFolderItemsCount), Times.Once());
+
+            this.libraryItemsDownloadService
+                .Verify(this.GetSaveLibraryItemsToStreamRecursively<Document>(), Times.Never());
+
+            string expectedData = this.GetTestZipStreamBytesAsText();
+           
+            Assert.AreEqual(expectedData, result);
         }
 
-        [Ignore("For Later")]
-        public void WhenHelperCannotFindTheFolder()
+        [Test]
+        public void ExpectSaveLibraryItemsToStreamRecursivelyToLeftZipArchiveEmptyWhenTheTheNestedFoldersDoNotHaveFiles()
         {
+            Lstring mockTitle = "TestTitle";
+            Mock<IFolder> folderMock = new Mock<IFolder>();
+            folderMock
+                .Setup(f => f.Title)
+                .Returns(mockTitle);
 
+            // Arrange
+            this.managerHelper
+                .Setup(helper => helper.GetChildFolders(It.Is<IFolder>(f => f.Title != mockTitle)))
+                .Returns(new List<IFolder>() { folderMock.Object }.AsQueryable());
+
+            this.managerHelper
+                .Setup(helper => helper.GetChildFolders(It.Is<IFolder>(f => f.Title == mockTitle)))
+                .Returns(Enumerable.Empty<IFolder>().AsQueryable());
+
+            this.managerHelper
+                .Setup(helper => helper.GetChildItems(It.IsAny<IFolder>()))
+                .Returns(Enumerable.Empty<Image>().AsQueryable());
+
+            Mock<IFolder> rootFolderMock = new Mock<IFolder>();
+            rootFolderMock
+                .Setup(f => f.Title)
+                .Returns("Root");
+
+            ZipFile zipStream = new ZipFile();
+
+            // Act
+            this.libraryItemsDownloadService.Object.SaveLibraryItemsToStreamRecursively<Image>(rootFolderMock.Object, zipStream, string.Empty);
+
+            // Assert
+            const int ExpectedCallsCount = 2;
+
+            Assert.AreEqual(0, zipStream.Entries.Count);
+            this.managerHelper
+               .Verify(helper => helper.GetChildFolders(It.IsAny<IFolder>()), Times.Exactly(ExpectedCallsCount));
+
+            this.managerHelper
+               .Verify(helper => helper.GetChildItems(It.IsAny<IFolder>()), Times.Exactly(ExpectedCallsCount));
+
+            this.managerHelper
+                .Verify(helper => helper.Download(It.IsAny<Image>()), Times.Never());
+        }
+
+        [Test]
+        public void ExpectSaveLibraryItemsToStreamRecursivelyToAddOneEntryWithTripleNestedFolders()
+        {
+            // Arrange
+            Lstring rootFolderTitle = "Root";
+            Lstring secondLevelTitle = "Second";
+            Lstring thirdLevelTitle = "Third";
+
+            Mock<IFolder> rootFolderMock = new Mock<IFolder>();
+            rootFolderMock.Setup(f => f.Title).Returns(rootFolderTitle);
+
+            Mock<IFolder> secondLevelMock = new Mock<IFolder>();
+            secondLevelMock.Setup(f => f.Title).Returns(secondLevelTitle);
+
+            Mock<IFolder> thirdLevelMock = new Mock<IFolder>();
+            thirdLevelMock.Setup(f => f.Title).Returns(thirdLevelTitle);
+
+            this.managerHelper
+               .Setup(helper => helper.GetChildFolders(It.Is<IFolder>(f => f.Title == rootFolderTitle)))
+               .Returns(new List<IFolder>() { secondLevelMock.Object }.AsQueryable());
+
+            this.managerHelper
+               .Setup(helper => helper.GetChildFolders(It.Is<IFolder>(f => f.Title == secondLevelTitle)))
+               .Returns(new List<IFolder>() { thirdLevelMock.Object }.AsQueryable());
+
+            this.managerHelper
+                .Setup(helper => helper.GetChildFolders(It.Is<IFolder>(f => f.Title == thirdLevelTitle)))
+                .Returns(Enumerable.Empty<IFolder>().AsQueryable());
+
+            Lstring videoTitle = "Demo.avi";
+            
+            Mock<Video> videoMock = new Mock<Video>();
+            videoMock.Setup(v => v.Title).Returns(videoTitle);
+            videoMock.Object.Status = ContentLifecycleStatus.Live;
+            videoMock.Object.FilePath = "/One/Two/Three/" + videoTitle; // TODO: Need to fix this tomorrow.
+
+            this.managerHelper
+                .Setup(helper => helper.GetChildItems(It.Is<IFolder>(f => f.Title == thirdLevelTitle)))
+                .Returns(new List<Video>() { videoMock.Object }.AsQueryable());
+
+            ZipFile zipStream = new ZipFile();
+
+            // Act
+            this.libraryItemsDownloadService.Object.SaveLibraryItemsToStreamRecursively<Video>(rootFolderMock.Object, zipStream, string.Empty);
+
+            // Assert
+            Assert.AreEqual(1, zipStream.Entries.Count);
+            Assert.AreEqual(videoTitle, zipStream.Entries[0].FileName);
         }
 
         public class FileZipModel

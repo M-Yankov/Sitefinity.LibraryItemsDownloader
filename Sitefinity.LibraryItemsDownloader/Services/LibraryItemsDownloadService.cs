@@ -61,8 +61,6 @@
 
             string result = string.Empty;
 
-            //LibrariesDataProvider
-            //libraryManager.Provider
             using (MemoryStream memoryStream = new MemoryStream())
             using (ZipFile zipFiles = new ZipFile())
             {
@@ -113,12 +111,10 @@
             IEnumerable<IFolder> innerFolders = this.libraryManagerHelper.GetChildFolders(folder).ToList();
             string titleSaveName = this.utilityHelper.ReplaceInvlaidCharacters(folder.Title.Trim());
             string innerFolderPathName = Path.Combine(directoryPathInArchive, titleSaveName);
-            if (innerFolders != null && innerFolders.Any())
+
+            foreach (IFolder innerFolder in innerFolders ?? Enumerable.Empty<IFolder>())
             {
-                foreach (IFolder innerFolder in innerFolders)
-                {
-                    this.SaveLibraryItemsToStreamRecursively<TContent>(innerFolder, zipStream, innerFolderPathName);
-                }
+                this.SaveLibraryItemsToStreamRecursively<TContent>(innerFolder, zipStream, innerFolderPathName);
             }
 
             IEnumerable<TContent> contentItems = this.libraryManagerHelper
