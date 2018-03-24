@@ -21,6 +21,9 @@ using Sitefinity.LibraryItemsDownloader.Helpers;
 using System.IO;
 using Telerik.Sitefinity;
 using Telerik.Sitefinity.GenericContent.Model;
+using Telerik.Sitefinity.Abstractions;
+using Telerik.Microsoft.Practices.EnterpriseLibrary.Logging;
+using Telerik.Microsoft.Practices.EnterpriseLibrary.Logging.Filters;
 
 namespace Sitefinity.LibraryItemsDownloader.Tests.Services
 {
@@ -42,10 +45,18 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
             appSettingsMock
                 .Setup(settings => settings.CurrentCulture)
                 .Returns(CultureInfo.CurrentCulture);
+
+            typeof(DataExtensions)
+                .GetField("appSettings", System.Reflection.BindingFlags.GetField | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                .SetValue(null, appSettingsMock.Object);
             #endregion
 
-            typeof(DataExtensions).GetField("appSettings", System.Reflection.BindingFlags.GetField | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
-                .SetValue(null, appSettingsMock.Object);
+            #region Hack Log.Writer
+            TestLogWriter testWriter = new TestLogWriter();
+            typeof(Log)
+                .GetField("writer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.GetField | System.Reflection.BindingFlags.Static)
+                .SetValue(null, testWriter);
+            #endregion
 
             Mock<IUtilityHelper> utilityHelperMock = new Mock<IUtilityHelper>();
             utilityHelperMock
@@ -455,6 +466,89 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
 
             this.managerHelper
                .Verify(helper => helper.GetChildFolders(It.Is<IFolder>(f => f.Title == rootFolderTitle)), Times.Once());
+        }
+
+        #region SaveLibraryItemsToStream Tests
+        [Test]
+        public void ExpectSaveLibraryItemsToStreamToNotThrowErrorIfGuidListIsNull()
+        {
+            ZipFile zipArchive = new ZipFile();
+
+            // Act
+            this.libraryItemsDownloadService.Object.SaveLibraryItemsToStream<Document>(null, zipArchive, string.Empty);
+
+            // Assert
+            Assert.AreEqual(0, zipArchive.Entries.Count);
+
+            this.managerHelper
+                .Verify(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()), Times.Never());
+        }
+
+        [Test]
+        public void ExpectSaveLibraryItemsToStreamToNotSaveAnyEntries()
+        {
+            ZipFile zipArchive = new ZipFile();
+            List<Guid> guidList = new List<Guid>() { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
+
+            // Arrange
+            this.managerHelper
+                .Setup(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()))
+                .Returns(null);
+
+            // Act
+            this.libraryItemsDownloadService.Object.SaveLibraryItemsToStream<Document>(guidList, zipArchive, string.Empty);
+
+            // Assert
+            Assert.AreEqual(0, zipArchive.Entries.Count);
+
+            this.managerHelper
+                .Verify(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()), Times.Exactly(guidList.Count));
+        }
+        #endregion
+
+        public class TestLogWriter : LogWriter
+        {
+            public override IDictionary<string, LogSource> TraceSources => throw new NotImplementedException();
+
+            public override T GetFilter<T>()
+            {
+                throw new NotImplementedException();
+            }
+
+            public override T GetFilter<T>(string name)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override ILogFilter GetFilter(string name)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override IEnumerable<LogSource> GetMatchingTraceSources(LogEntry logEntry)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override bool IsLoggingEnabled()
+            {
+                throw new NotImplementedException();
+            }
+
+            public override bool IsTracingEnabled()
+            {
+                throw new NotImplementedException();
+            }
+
+            public override bool ShouldLog(LogEntry log)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void Write(LogEntry log)
+            {
+             //   throw new NotImplementedException();
+            }
         }
 
         public class FileZipModel

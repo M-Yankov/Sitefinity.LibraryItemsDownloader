@@ -4,6 +4,7 @@
     using System.IO;
     using System.Linq;
     using Telerik.Sitefinity;
+    using Telerik.Sitefinity.GenericContent.Model;
     using Telerik.Sitefinity.Libraries.Model;
     using Telerik.Sitefinity.Modules.GenericContent;
     using Telerik.Sitefinity.Modules.Libraries;
@@ -12,9 +13,14 @@
     {
         private readonly LibrariesManager librariesManager;
 
-        public LibraryManagerHelper() 
+        public LibraryManagerHelper()
             : this(LibrariesManager.GetManager())
         {
+        }
+
+        public virtual TContent GetLiveBase<TContent>(TContent content)  where TContent : Content
+        {
+            return this.librariesManager.Provider.GetLiveBase<TContent>(content);
         }
 
         public LibraryManagerHelper(LibrariesManager librariesManager)
@@ -40,14 +46,6 @@
         public virtual object GetItem(Type itemType, Guid id)
         {
             return this.librariesManager.GetItem(itemType, id);
-        }
-
-        public virtual ContentDataProviderBase Provider
-        {
-            get
-            {
-                return this.librariesManager.Provider;
-            }
         }
 
         public virtual IFolder GetFolder(Guid id)

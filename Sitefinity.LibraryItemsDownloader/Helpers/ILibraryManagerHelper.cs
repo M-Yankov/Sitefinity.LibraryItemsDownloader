@@ -4,12 +4,12 @@
     using System.IO;
     using System.Linq;
     using Telerik.Sitefinity;
+    using Telerik.Sitefinity.GenericContent.Model;
     using Telerik.Sitefinity.Libraries.Model;
-    using Telerik.Sitefinity.Modules.GenericContent;
 
     public interface ILibraryManagerHelper
     {
-        ContentDataProviderBase Provider { get; }
+        TContent GetLiveBase<TContent>(TContent content) where TContent : Content;
 
         Stream Download(MediaContent content);
 

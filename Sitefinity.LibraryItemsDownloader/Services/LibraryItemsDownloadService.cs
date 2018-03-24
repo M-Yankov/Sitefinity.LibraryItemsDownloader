@@ -134,12 +134,12 @@
 
         public virtual void SaveLibraryItemsToStream<TContent>(IEnumerable<Guid> selectedItemIds, ZipFile zipStream, string directoryPathInArchive) where TContent : MediaContent
         {
-            foreach (Guid selectedId in selectedItemIds)
+            foreach (Guid selectedId in selectedItemIds ?? Enumerable.Empty<Guid>())
             {
                 TContent contentItem = this.libraryManagerHelper.GetItem(typeof(TContent), selectedId) as TContent;
                 if (contentItem != null)
                 {
-                    TContent contentItemLiveVersion = this.libraryManagerHelper.Provider.GetLiveBase<TContent>(contentItem);
+                    TContent contentItemLiveVersion = this.libraryManagerHelper.GetLiveBase<TContent>(contentItem);
 
                     if (contentItemLiveVersion == null)
                     {
