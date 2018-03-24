@@ -30,11 +30,23 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
         private Mock<LibraryItemsDownloadService> libraryItemsDownloadService;
         private Mock<ILibraryManagerHelper> managerHelper;
 
-        public readonly Action DoNothing = () => { };
-
         [SetUp]
         public void Initialize()
         {
+            #region Hack MediaContent.FilePath = value
+            Mock<IAppSettings> appSettingsMock = new Mock<IAppSettings>();
+            appSettingsMock
+                .Setup(settings => settings.Current)
+                .Returns(appSettingsMock.Object);
+
+            appSettingsMock
+                .Setup(settings => settings.CurrentCulture)
+                .Returns(CultureInfo.CurrentCulture);
+            #endregion
+
+            typeof(DataExtensions).GetField("appSettings", System.Reflection.BindingFlags.GetField | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                .SetValue(null, appSettingsMock.Object);
+
             Mock<IUtilityHelper> utilityHelperMock = new Mock<IUtilityHelper>();
             utilityHelperMock
                 .Setup(helper => helper.ReplaceInvlaidCharacters(It.IsAny<string>(), It.IsAny<string>()))
@@ -299,7 +311,7 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
                 .Verify(this.GetSaveLibraryItemsToStreamRecursively<Document>(), Times.Never());
 
             string expectedData = this.GetTestZipStreamBytesAsText();
-           
+
             Assert.AreEqual(expectedData, result);
         }
 
@@ -379,11 +391,12 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
                 .Returns(Enumerable.Empty<IFolder>().AsQueryable());
 
             Lstring videoTitle = "Demo.avi";
-            
+
             Mock<Video> videoMock = new Mock<Video>();
             videoMock.Setup(v => v.Title).Returns(videoTitle);
             videoMock.Object.Status = ContentLifecycleStatus.Live;
-            videoMock.Object.FilePath = "/One/Two/Three/" + videoTitle; // TODO: Need to fix this tomorrow.
+            videoMock.Object.MediaFileLinks.Add(new MediaFileLink() { Culture = CultureInfo.CurrentCulture.LCID });
+            videoMock.Object.FilePath = "/One/Two/Three/" + videoTitle;
 
             this.managerHelper
                 .Setup(helper => helper.GetChildItems(It.Is<IFolder>(f => f.Title == thirdLevelTitle)))
@@ -395,8 +408,53 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
             this.libraryItemsDownloadService.Object.SaveLibraryItemsToStreamRecursively<Video>(rootFolderMock.Object, zipStream, string.Empty);
 
             // Assert
+            string expectedPath = string.Format("{0}/{1}/{2}/{3}", rootFolderTitle.ToString(), secondLevelTitle.ToString(), thirdLevelTitle.ToString(), videoTitle.ToString());
             Assert.AreEqual(1, zipStream.Entries.Count);
-            Assert.AreEqual(videoTitle, zipStream.Entries[0].FileName);
+            Assert.AreEqual(expectedPath, zipStream.Entries[0].FileName);
+            Assert.AreEqual(videoTitle.ToString(), zipStream.Entries[0].LocalFileName);
+
+            const int callsCount = 3;
+
+            this.managerHelper
+                .Verify(helper => helper.GetChildFolders(It.IsAny<IFolder>()), Times.Exactly(callsCount));
+
+            this.managerHelper
+                .Verify(helper => helper.GetChildItems(It.IsAny<IFolder>()), Times.Exactly(callsCount));
+        }
+
+        [Test]
+        public void ExpectSaveLibraryItemsToStreamRecursivelyToSaveItemsInTheCurrentFolder()
+        {
+            var list = new List<Document>();
+
+            list.Add(this.GetMockContent<Document>("ReadMe.MD", "/Root").Object);
+            list.Add(this.GetMockContent<Document>("ReleaseNotes9.1.5600.txt", "/Root").Object);
+            list.Add(this.GetMockContent<Document>("Configuration.doc", "/Root").Object);
+            list.Add(this.GetMockContent<Document>("Sitefinity.lic", "/Root").Object);
+
+            // Arrange
+            Lstring rootFolderTitle = "Root";
+
+            Mock<IFolder> rootFolderMock = new Mock<IFolder>();
+            rootFolderMock.Setup(f => f.Title).Returns(rootFolderTitle);
+
+            this.managerHelper
+                .Setup(helper => helper.GetChildItems(It.Is<IFolder>(f => f.Title == rootFolderTitle)))
+                .Returns(list.AsQueryable());
+
+            ZipFile zipStream = new ZipFile();
+
+            // Act
+            this.libraryItemsDownloadService.Object.SaveLibraryItemsToStreamRecursively<Document>(rootFolderMock.Object, zipStream, string.Empty);
+
+            // Assert
+            Assert.AreEqual(list.Count, zipStream.Entries.Count);
+
+            this.managerHelper
+               .Verify(helper => helper.GetChildItems(It.Is<IFolder>(f => f.Title == rootFolderTitle)), Times.Once());
+
+            this.managerHelper
+               .Verify(helper => helper.GetChildFolders(It.Is<IFolder>(f => f.Title == rootFolderTitle)), Times.Once());
         }
 
         public class FileZipModel
@@ -416,6 +474,19 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
 
             // Hack field - synchronize the last modified date between result data and expected data
             public DateTime LastModified { get; set; }
+        }
+
+        private Mock<TContent> GetMockContent<TContent>(string title, string path) where TContent : MediaContent
+        {
+            Lstring videoTitle = title;
+
+            Mock<TContent> contentMock = new Mock<TContent>();
+            contentMock.Setup(v => v.Title).Returns(videoTitle);
+            contentMock.Object.Status = ContentLifecycleStatus.Live;
+            contentMock.Object.MediaFileLinks.Add(new MediaFileLink() { Culture = CultureInfo.CurrentCulture.LCID });
+            contentMock.Object.FilePath = path + videoTitle;
+
+            return contentMock;
         }
 
         private string GetTestZipStreamBytesAsText(params FileZipModel[] zipModels)
