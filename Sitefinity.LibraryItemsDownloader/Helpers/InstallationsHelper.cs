@@ -25,52 +25,59 @@
         private const string DownloadSelectedVideosCommandName = "DownloadSelectedVideos";
         private const string DownloadSelectedDocumentsCommandName = "DownloadSelectedDocuments";
         private const string ClientMasterViewLoadMethodName = "OnMasterViewLoadedCustom";
+        private const string NullMessage = "NULL";
 #if DEBUG
         private const string JavascriptFileName = "LibraryItemsDownloadService.js";
 #else
         private const string JavascriptFileName = "LibraryItemsDownloadService.min.js";
 #endif
 
+        private readonly IConfigManagerHelper configManagerHelper;
+
+        public InstallationsHelper(IConfigManagerHelper configManagerHelper)
+        {
+            this.configManagerHelper = configManagerHelper;
+        }
+
         public void Initialize()
         {
-            ConfigManager manager = ConfigManager.GetManager();
-
             // While initializing, the context is not authenticated to save.
-            using (ElevatedModeRegion elevatedMode = new ElevatedModeRegion(manager))
+            using (ElevatedModeRegion elevatedMode = new ElevatedModeRegion(this.configManagerHelper.Manager))
             {
-                LibrariesConfig libsConfig = manager.GetSection<LibrariesConfig>();
-                this.ConfigureLibrarySection(manager, libsConfig, ImagesDefinitions.BackendImagesDefinitionName, ImagesDefinitions.BackendListViewName, DownloadSelectedImagesCommandName, "Download selected images");
-                this.ConfigureLibrarySection(manager, libsConfig, VideosDefinitions.BackendVideosDefinitionName, VideosDefinitions.BackendListViewName, DownloadSelectedVideosCommandName, "Download selected videos");
-                this.ConfigureLibrarySection(manager, libsConfig, DocumentsDefinitions.BackendDefinitionName, DocumentsDefinitions.BackendListViewName, DownloadSelectedDocumentsCommandName, "Download selected documents");
+                LibrariesConfig libsConfig = this.configManagerHelper.GetSection<LibrariesConfig>();
+                this.ConfigureLibrarySection(this.configManagerHelper, libsConfig, ImagesDefinitions.BackendImagesDefinitionName, ImagesDefinitions.BackendListViewName, DownloadSelectedImagesCommandName, "Download selected images");
+                this.ConfigureLibrarySection(this.configManagerHelper, libsConfig, VideosDefinitions.BackendVideosDefinitionName, VideosDefinitions.BackendListViewName, DownloadSelectedVideosCommandName, "Download selected videos");
+                this.ConfigureLibrarySection(this.configManagerHelper, libsConfig, DocumentsDefinitions.BackendDefinitionName, DocumentsDefinitions.BackendListViewName, DownloadSelectedDocumentsCommandName, "Download selected documents");
             }
         }
 
-        public void ConfigureLibrarySection(ConfigManager manager, LibrariesConfig libsConfig, string definitionName, string backendListViewName, string commandName, string commandText)
+        public virtual void ConfigureLibrarySection(IConfigManagerHelper manager, LibrariesConfig libsConfig, string definitionName, string backendListViewName, string commandName, string commandText)
         {
-            if (!libsConfig.ContentViewControls.ContainsKey(definitionName))
+            if (libsConfig == null || string.IsNullOrWhiteSpace(definitionName) || !libsConfig.ContentViewControls.ContainsKey(definitionName))
             {
-                string exceptionMessage = string.Format("Cannot find content view control: {0} related with libraries configuration.", definitionName);
+                string exceptionMessage = string.Format("Cannot find content view control: {0} related with libraries configuration.", definitionName ?? NullMessage);
                 throw new NullReferenceException(exceptionMessage);
             }
 
-            ContentViewControlElement imagesBackend = libsConfig.ContentViewControls[definitionName];
-            if (!imagesBackend.ContainsView(backendListViewName))
+            ContentViewControlElement backendDefinition = libsConfig.ContentViewControls[definitionName];
+            if (string.IsNullOrWhiteSpace(definitionName) || !backendDefinition.ContainsView(backendListViewName))
             {
-                string exceptionMessage = string.Format("Cannot find back-end view: {0}.", backendListViewName);
+                string exceptionMessage = string.Format("Cannot find back-end view: {0}.", backendListViewName ?? NullMessage);
                 throw new NullReferenceException(exceptionMessage);
             }
 
-            ContentViewDefinitionElement view = imagesBackend.ViewsConfig[backendListViewName];
+            ContentViewDefinitionElement backendListView = backendDefinition.ViewsConfig[backendListViewName];
 
             Assembly itemsDownloaderAssembly = typeof(Installer).Assembly;
             string javascriptKey = this.GetJavaScriptQualifiedNameKey(itemsDownloaderAssembly, JavascriptFileName);
 
-            if (this.AddOrUpdateScriptReference(javascriptKey, itemsDownloaderAssembly,  view.Scripts))
+            bool shouldSaveSection = this.AddOrUpdateScriptReference(javascriptKey, itemsDownloaderAssembly, backendListView.Scripts);
+            if (shouldSaveSection)
             {
                 manager.SaveSection(imagesBackend.Section);
             }
 
-            MasterGridViewElement masterView = view as MasterGridViewElement;
+            MasterGridViewElement masterView = backendListView as MasterGridViewElement;
 
             WidgetBarElement toolbarConfig = masterView.ToolbarConfig as WidgetBarElement;
             WidgetBarSectionElement widgetBarSectionElement = toolbarConfig.Sections.OfType<WidgetBarSectionElement>().FirstOrDefault(s => s.Name == WidgetBarSectionName);
@@ -90,12 +97,22 @@
                 downloadSelectedImagesCommand.Text = commandText;
 
                 moreActionsWidgetElement.MenuItems.Add(downloadSelectedImagesCommand);
-                manager.SaveSection(imagesBackend.Section);
+                manager.SaveSection(backendDefinition.Section);
             }
         }
 
-        public string GetJavaScriptQualifiedNameKey(Assembly libraryItemsDownloaderAssembly, string scriptFileName)
+        public virtual string GetJavaScriptQualifiedNameKey(Assembly libraryItemsDownloaderAssembly, string scriptFileName)
         {
+            if (libraryItemsDownloaderAssembly == null)
+            {
+                throw new ArgumentNullException("libraryItemsDownloaderAssembly", "Assembly cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(scriptFileName))
+            {
+                throw new ArgumentNullException("scriptFileName", "Script file name is null.");
+            }
+
             string fullNamespaceJavaScriptFile = libraryItemsDownloaderAssembly.GetManifestResourceNames().FirstOrDefault(fileName => fileName.EndsWith(scriptFileName));
             if (fullNamespaceJavaScriptFile == null)
             {
@@ -107,21 +124,21 @@
             return javaScriptQualifiedNameKey;
         }
 
-        public bool AddOrUpdateScriptReference(string configKey, Assembly currentAssembly, ConfigElementDictionary<string, ClientScriptElement> scriptsElements)
+        public virtual bool AddOrUpdateScriptReference(string configKey, Assembly currentAssembly, ConfigElementDictionary<string, ClientScriptElement> scriptsElements)
         {
-            if (string.IsNullOrEmpty(configKey))
+            if (string.IsNullOrWhiteSpace(configKey))
             {
-                throw new NullReferenceException("Config key cannot be null or empty.");
+                throw new ArgumentNullException("configKey", "Config key cannot be null or empty.");
             }
 
             if (currentAssembly == null)
             {
-                throw new NullReferenceException("Assembly cannot be null.");
+                throw new ArgumentNullException("currentAssembly", "Assembly cannot be null.");
             }
 
             if (scriptsElements == null)
             {
-                throw new NullReferenceException("The scripts elements collection cannot be empty.");
+                throw new ArgumentNullException("scriptsElements", "The scripts elements collection cannot be null.");
             }
 
             if (scriptsElements.ContainsKey(configKey))

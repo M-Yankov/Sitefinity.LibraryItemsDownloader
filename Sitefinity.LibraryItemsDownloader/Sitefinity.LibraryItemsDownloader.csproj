@@ -38,8 +38,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>mihyan.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <DelaySign>false</DelaySign>
@@ -72,8 +71,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="LibraryItemsDownloadService.js" />
+    <Compile Include="Helpers\ConfigManagerHelper.cs" />
+    <Compile Include="Helpers\IConfigManagerHelper.cs" />
     <Compile Include="Helpers\IInstallationsHelper.cs" />
+    <Compile Include="Helpers\ILibraryManagerHelper.cs" />
     <Compile Include="Helpers\IUtilityHelper.cs" />
+    <Compile Include="Helpers\LibraryManagerHelper.cs" />
     <Compile Include="Helpers\UtilityHelper.cs" />
     <Compile Include="Services\Models\DownloadLibaryItemRequestModel.cs" />
     <Compile Include="Services\ILibraryItemsDownloadService.cs" />
@@ -84,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="mihyan.snk" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="LibraryItemsDownloadService.min.js">

@@ -18,6 +18,11 @@
 
         public string ReplaceInvlaidCharacters(string text, string replaceCharacter = DefaultReplaceCharacter)
         {
+            if (text == null)
+            {
+                text = string.Empty;
+            }
+
             StringBuilder textResult = new StringBuilder();
             foreach (char currentSymbol in text)
             {
