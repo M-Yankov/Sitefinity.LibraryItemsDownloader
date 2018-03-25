@@ -87,12 +87,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Libraries\7.3.5600.0.zip" />
+    <None Include="Libraries\9.1.6100.zip" />
     <None Include="mihyan.snk" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="LibraryItemsDownloadService.min.js">
       <DependentUpon>LibraryItemsDownloadService.js</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Libraries\Telerik.OpenAccess.dll" />
+    <Content Include="Libraries\Telerik.Sitefinity.dll" />
+    <Content Include="Libraries\Telerik.Sitefinity.Model.dll" />
+    <Content Include="Libraries\Telerik.Sitefinity.Utilities.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
