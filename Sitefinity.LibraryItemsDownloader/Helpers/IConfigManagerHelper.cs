@@ -9,6 +9,6 @@
 
         TSection GetSection<TSection>() where TSection : ConfigSection, new();
 
-        void SaveSection(ConfigSection section, bool useFileSystemMode);
+        void SaveSection(ConfigSection section);
     }
 }

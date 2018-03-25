@@ -207,7 +207,7 @@
             installationsHelperMock.Object.ConfigureLibrarySection(managerHelperMock.Object, this.librariesConfigMock.Object, ContentViewControls, DefaultViewName, DefaultCommandName, null);
 
             // Assert
-            managerHelperMock.Verify(helper => helper.SaveSection(It.IsAny<ConfigSection>(), It.IsAny<bool>()), Times.Never());
+            managerHelperMock.Verify(helper => helper.SaveSection(It.IsAny<ConfigSection>()), Times.Never());
         }
 
         [Test]
@@ -231,7 +231,7 @@
             installationsHelperMock.Object.ConfigureLibrarySection(managerHelperMock.Object, this.librariesConfigMock.Object, ContentViewControls, DefaultViewName, DefaultCommandName, null);
 
             // Assert
-            managerHelperMock.Verify(helper => helper.SaveSection(It.IsAny<ConfigSection>(), It.IsAny<bool>()), Times.Once());
+            managerHelperMock.Verify(helper => helper.SaveSection(It.IsAny<ConfigSection>()), Times.Once());
         }
 
         [Test]
@@ -257,7 +257,7 @@
             installationsHelperMock.Object.ConfigureLibrarySection(managerHelperMock.Object, this.librariesConfigMock.Object, ContentViewControls, DefaultViewName, DefaultCommandName, null);
 
             // Assert
-            managerHelperMock.Verify(helper => helper.SaveSection(It.IsAny<ConfigSection>(), It.IsAny<bool>()), Times.Once());
+            managerHelperMock.Verify(helper => helper.SaveSection(It.IsAny<ConfigSection>()), Times.Once());
 
             const int ExpectedCount = 2;
             Assert.AreEqual(ExpectedCount, this.actionMenuWidgetMock.Object.MenuItems.Count);
@@ -288,7 +288,7 @@
             const int ExpectedCount = 2;
 
             // Assert
-            managerHelperMock.Verify(helper => helper.SaveSection(It.IsAny<ConfigSection>(), It.IsAny<bool>()), Times.Exactly(ExpectedCount));
+            managerHelperMock.Verify(helper => helper.SaveSection(It.IsAny<ConfigSection>()), Times.Exactly(ExpectedCount));
 
             Assert.AreEqual(ExpectedCount, this.actionMenuWidgetMock.Object.MenuItems.Count);
         }

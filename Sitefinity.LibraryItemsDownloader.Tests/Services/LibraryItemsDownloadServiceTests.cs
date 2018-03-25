@@ -34,18 +34,18 @@
         public void Initialize()
         {
             #region Hack MediaContent.FilePath = value
-            Mock<IAppSettings> appSettingsMock = new Mock<IAppSettings>();
-            appSettingsMock
-                .Setup(settings => settings.Current)
-                .Returns(appSettingsMock.Object);
+            //Mock<IAppSettings> appSettingsMock = new Mock<IAppSettings>();
+            //appSettingsMock
+            //    .Setup(settings => settings.Current)
+            //    .Returns(appSettingsMock.Object);
 
-            appSettingsMock
-                .Setup(settings => settings.CurrentCulture)
-                .Returns(CultureInfo.CurrentCulture);
+            //appSettingsMock
+            //    .Setup(settings => settings.CurrentCulture)
+            //    .Returns(CultureInfo.CurrentCulture);
 
-            typeof(DataExtensions)
-                .GetField("appSettings", System.Reflection.BindingFlags.GetField | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
-                .SetValue(null, appSettingsMock.Object);
+            //typeof(DataExtensions)
+            //    .GetField("appSettings", System.Reflection.BindingFlags.GetField | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+            //    .SetValue(null, appSettingsMock.Object);
             #endregion
 
             #region Hack Log.Writer
@@ -405,7 +405,7 @@
             Mock<Video> videoMock = new Mock<Video>();
             videoMock.Setup(v => v.Title).Returns(videoTitle);
             videoMock.Object.Status = ContentLifecycleStatus.Live;
-            videoMock.Object.MediaFileLinks.Add(new MediaFileLink() { Culture = CultureInfo.CurrentCulture.LCID });
+            //// videoMock.Object.MediaFileLinks.Add(new MediaFileLink() { Culture = CultureInfo.CurrentCulture.LCID });
             videoMock.Object.FilePath = "/One/Two/Three/" + videoTitle;
 
             this.managerHelper
@@ -743,7 +743,7 @@
             contentMock.Setup(v => v.Title).Returns(contentTile);
             contentMock.Setup(v => v.Id).Returns(guid);
             contentMock.Object.Status = ContentLifecycleStatus.Live;
-            contentMock.Object.MediaFileLinks.Add(new MediaFileLink() { Culture = CultureInfo.CurrentCulture.LCID });
+            //// contentMock.Object.MediaFileLinks.Add(new MediaFileLink() { Culture = CultureInfo.CurrentCulture.LCID });
             contentMock.Object.FilePath = path + contentTile;
 
             return contentMock;

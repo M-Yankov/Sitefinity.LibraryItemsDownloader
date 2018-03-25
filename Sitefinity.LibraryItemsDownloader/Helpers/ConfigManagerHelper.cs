@@ -25,9 +25,9 @@
             return this.configManager.GetSection<TSection>();
         }
 
-        public void SaveSection(ConfigSection section, bool useFileSystemMode)
+        public void SaveSection(ConfigSection section)
         {
-            this.configManager.SaveSection(section, useFileSystemMode);
+            this.configManager.SaveSection(section);
         }
     }
 }

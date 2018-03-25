@@ -74,7 +74,7 @@
             bool shouldSaveSection = this.AddOrUpdateScriptReference(javascriptKey, itemsDownloaderAssembly, backendListView.Scripts);
             if (shouldSaveSection)
             {
-                manager.SaveSection(imagesBackend.Section);
+                manager.SaveSection(backendDefinition.Section);
             }
 
             MasterGridViewElement masterView = backendListView as MasterGridViewElement;
