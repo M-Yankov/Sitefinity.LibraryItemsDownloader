@@ -1,0 +1,26 @@
+﻿version: 9.1.5600.{build}
+skip_tags: true
+configuration: Release
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+environment:
+  COVERALLS_REPO_TOKEN:
+    secure: CxtxhzTDroUZSX38zavXXCITUQ8pKTI1k
+before_build:
+  - nuget restore Sitefinity.LibraryItemsDownloader.sln
+build:
+  project: Sitefinity.LibraryItemsDownloader.sln
+  verbosity: minimal
+test_script:
+- ps: >-
+    .\packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -register:user -target:.\packages\NUnit.ConsoleRunner.3.8.0\tools\nunit3-console.exe -targetargs:".\Sitefinity.LibraryItemsDownloader.Tests\bin\Debug\Sitefinity.LibraryItemsDownloader.Tests.dll -shadowcopy"  -output:opencoverCoverage.xml
+
+    $coveralls = (Resolve-Path "packages/coveralls.net.*/tools/csmacnz.coveralls.exe").ToString()
+    
+    $env:APPVEYOR_BUILD_NUMBER
+    
+    & $coveralls --opencover -i opencoverCoverage.xml --repoToken $env:COVERALLS_REPO_TOKEN --useRelativePaths --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR  --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_BUILD_NUMBER --serviceName appveyor
