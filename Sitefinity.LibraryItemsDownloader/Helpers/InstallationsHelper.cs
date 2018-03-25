@@ -17,6 +17,10 @@
     using Telerik.Sitefinity.Web.UI.ContentUI.Config;
     using Telerik.Sitefinity.Web.UI.ContentUI.Views.Backend.Master.Config;
 
+    /// <summary>
+    /// Installs the necessary configuration items and references in the sitefinity back-end. 
+    /// </summary>
+    /// <seealso cref="Sitefinity.LibraryItemsDownloader.Helpers.IInstallationsHelper" />
     public class InstallationsHelper : IInstallationsHelper
     {
         private const string WidgetBarSectionName = "toolbar";
@@ -34,11 +38,18 @@
 
         private readonly IConfigManagerHelper configManagerHelper;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InstallationsHelper"/> class.
+        /// </summary>
+        /// <param name="configManagerHelper">The configuration manager helper.</param>
         public InstallationsHelper(IConfigManagerHelper configManagerHelper)
         {
             this.configManagerHelper = configManagerHelper;
         }
 
+        /// <summary>
+        /// Starts the whole configuration. Set up back-end sections. Invoked on PreApplicationStart.
+        /// </summary>
         public void Initialize()
         {
             // While initializing, the context is not authenticated to save.
@@ -51,6 +62,17 @@
             }
         }
 
+        /// <summary>
+        /// Set up library back-end section.
+        /// </summary>
+        /// <param name="manager">The manager wrapper for libraries section.</param>
+        /// <param name="libsConfig">The library configuration (LibrariesConfig.Config).</param>
+        /// <param name="definitionName">Name of the back-end section.</param>
+        /// <param name="backendListViewName">Name of the back-end ListView (ImagesBackEnd, VideosBackend, DocumentsBackeEnd).</param>
+        /// <param name="commandName">Name of the command referenced in JavaScript file. On download selected items it rises up the provided command. (For images, video or document)</param>
+        /// <param name="commandText">The command text to be displayed on the front-end.</param>
+        /// <exception cref="NullReferenceException">
+        /// </exception>
         public virtual void ConfigureLibrarySection(IConfigManagerHelper manager, LibrariesConfig libsConfig, string definitionName, string backendListViewName, string commandName, string commandText)
         {
             if (libsConfig == null || string.IsNullOrWhiteSpace(definitionName) || !libsConfig.ContentViewControls.ContainsKey(definitionName))
@@ -101,6 +123,23 @@
             }
         }
 
+        /// <summary>
+        /// Gets the JavaScript qualified name key. 
+        /// <para>
+        /// Example: "Sitefinity.LibraryItemsDownloader.LibraryItemsDownloadService.js, Sitefinity.LibraryItemsDownloader, Version=7.3.5600, Culture=neutral, PublicKeyToken=null"
+        /// </para>
+        /// </summary>
+        /// <param name="libraryItemsDownloaderAssembly">The Sitefinity.LibraryItemsDownloader assembly.</param>
+        /// <param name="scriptFileName">Name of the script file.</param>
+        /// <returns>
+        /// The full name of the JavaScript resource file with full namespace.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// libraryItemsDownloaderAssembly - Assembly cannot be null.
+        /// or
+        /// scriptFileName - Script file name is null.
+        /// </exception>
+        /// <exception cref="NullReferenceException"></exception>
         public virtual string GetJavaScriptQualifiedNameKey(Assembly libraryItemsDownloaderAssembly, string scriptFileName)
         {
             if (libraryItemsDownloaderAssembly == null)
@@ -124,6 +163,22 @@
             return javaScriptQualifiedNameKey;
         }
 
+        /// <summary>
+        /// Adds or updates a script reference in the back-end. It's important to use the latest version of the script when a new version is installed.
+        /// </summary>
+        /// <param name="configKey">The configuration key that will be added in <paramref name="scriptsElements" />.</param>
+        /// <param name="currentAssembly">The Sitefinity.LibraryItemsDownloader assembly. Using the name of the assembly determines the reference exists or not.</param>
+        /// <param name="scriptsElements">A collection of all script elements referenced in the back-end section.</param>
+        /// <returns>
+        /// Whether to save section or not/
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// configKey - Config key cannot be null or empty.
+        /// or
+        /// currentAssembly - Assembly cannot be null.
+        /// or
+        /// scriptsElements - The scripts elements collection cannot be null.
+        /// </exception>
         public virtual bool AddOrUpdateScriptReference(string configKey, Assembly currentAssembly, ConfigElementDictionary<string, ClientScriptElement> scriptsElements)
         {
             if (string.IsNullOrWhiteSpace(configKey))

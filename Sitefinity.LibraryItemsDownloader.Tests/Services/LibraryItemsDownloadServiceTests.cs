@@ -57,7 +57,7 @@
 
             Mock<IUtilityHelper> utilityHelperMock = new Mock<IUtilityHelper>();
             utilityHelperMock
-                .Setup(helper => helper.ReplaceInvlaidCharacters(It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(helper => helper.ReplaceInvalidCharacters(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns<string, string>((text, replaceChar) => text);
 
             this.managerHelper = new Mock<ILibraryManagerHelper>();
