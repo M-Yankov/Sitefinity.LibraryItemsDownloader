@@ -6,7 +6,6 @@
     using Telerik.Sitefinity;
     using Telerik.Sitefinity.GenericContent.Model;
     using Telerik.Sitefinity.Libraries.Model;
-    using Telerik.Sitefinity.Modules.GenericContent;
     using Telerik.Sitefinity.Modules.Libraries;
 
     public class LibraryManagerHelper : ILibraryManagerHelper
@@ -18,14 +17,14 @@
         {
         }
 
-        public virtual TContent GetLiveBase<TContent>(TContent content)  where TContent : Content
-        {
-            return this.librariesManager.Provider.GetLiveBase<TContent>(content);
-        }
-
         public LibraryManagerHelper(LibrariesManager librariesManager)
         {
             this.librariesManager = librariesManager;
+        }
+
+        public virtual TContent GetLiveBase<TContent>(TContent content) where TContent : Content
+        {
+            return this.librariesManager.Provider.GetLiveBase<TContent>(content);
         }
 
         public virtual IQueryable<IFolder> GetChildFolders(IFolder parentFolder)

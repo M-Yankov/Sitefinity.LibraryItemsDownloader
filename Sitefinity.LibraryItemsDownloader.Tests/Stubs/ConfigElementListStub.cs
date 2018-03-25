@@ -23,5 +23,4 @@
             this.OnItemInserted(item, key);
         }
     }
-
 }

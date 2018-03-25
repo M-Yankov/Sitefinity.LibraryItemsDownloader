@@ -83,7 +83,7 @@
             this.widgetBarElementMock.Setup(element => element["sections"]).Returns(sectionElements);
             this.masterGridViewMock.Setup(masterView => masterView["toolbar"]).Returns(this.widgetBarElementMock.Object);
 
-            backendDefinition.ViewsConfig[DefaultViewName] = masterGridViewMock.Object;
+            backendDefinition.ViewsConfig[DefaultViewName] = this.masterGridViewMock.Object;
             contentViewControls.Add(ContentViewControls, backendDefinition);
             this.librariesConfigMock.Setup(config => config[ContentViewControls]).Returns(contentViewControls);
         }
@@ -100,7 +100,6 @@
 
             Expression<Action<InstallationsHelper>> setupConfigureLibrarySectionMethod =
                 (helper) => helper.ConfigureLibrarySection(It.IsAny<IConfigManagerHelper>(), It.IsAny<LibrariesConfig>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>());
-
 
             installationsHelperMock
                 .Setup(setupConfigureLibrarySectionMethod)
@@ -156,7 +155,7 @@
                 installationsHelper.ConfigureLibrarySection(null, librariesConfig.Object, testDefinitionName, null, null, null);
             });
         }
-        
+
         [Test]
         public void ExpectConfigureLibrarySectionToThrowAnExceptionWhenBackEndListViewNameIsNull()
         {
@@ -193,7 +192,7 @@
             // Arrange
             Mock<InstallationsHelper> installationsHelperMock = new Mock<InstallationsHelper>(null);
             installationsHelperMock.CallBase = true;
-            
+
             installationsHelperMock
                 .Setup(helper => helper.AddOrUpdateScriptReference(It.IsAny<string>(), It.IsAny<Assembly>(), It.IsAny<ConfigElementDictionary<string, ClientScriptElement>>()))
                 .Returns(false);
@@ -201,7 +200,7 @@
             installationsHelperMock
                 .Setup(helper => helper.GetJavaScriptQualifiedNameKey(It.IsAny<Assembly>(), It.IsAny<string>()))
                 .Returns("SampleSciptKey");
-           
+
             Mock<IConfigManagerHelper> managerHelperMock = new Mock<IConfigManagerHelper>();
 
             // Act
@@ -234,7 +233,6 @@
             // Assert
             managerHelperMock.Verify(helper => helper.SaveSection(It.IsAny<ConfigSection>(), It.IsAny<bool>()), Times.Once());
         }
-
 
         [Test]
         public void ExpectConfigureLibrarySectionToCallSaveSectionsMethodOnceWhenTheCommandWidgetIsMissing()
@@ -288,6 +286,7 @@
             installationsHelperMock.Object.ConfigureLibrarySection(managerHelperMock.Object, this.librariesConfigMock.Object, ContentViewControls, DefaultViewName, DefaultCommandName, null);
 
             const int ExpectedCount = 2;
+
             // Assert
             managerHelperMock.Verify(helper => helper.SaveSection(It.IsAny<ConfigSection>(), It.IsAny<bool>()), Times.Exactly(ExpectedCount));
 
@@ -332,9 +331,9 @@
                 installationsHelper.GetJavaScriptQualifiedNameKey(assemblyMock.Object, scriptFileName);
             });
         }
-        
+
         [Test]
-        public void ExpectGetJavaScriptQualifiedNameKeyToRetrurnCorrectResults ()
+        public void ExpectGetJavaScriptQualifiedNameKeyToRetrurnCorrectResults()
         {
             InstallationsHelper installationsHelper = new InstallationsHelper(null);
 
@@ -345,7 +344,7 @@
             assemblyMock.Setup(assembly => assembly.GetManifestResourceNames()).Returns(new string[] { fullNameSpacescriptFileName });
             assemblyMock.Setup(assembly => assembly.FullName).Returns(fullName);
 
-            string result =installationsHelper.GetJavaScriptQualifiedNameKey(assemblyMock.Object, scriptFileName);
+            string result = installationsHelper.GetJavaScriptQualifiedNameKey(assemblyMock.Object, scriptFileName);
             Assert.IsNotNull(result);
             Assert.AreEqual($"{fullNameSpacescriptFileName}, {fullName}", result);
         }
@@ -402,6 +401,7 @@
             ConfigElementDictionary<string, ClientScriptElement> scriptElements = new ConfigElementDictionary<string, ClientScriptElement>(this.parentSection);
 
             string configurationKey = "ConfigurationKey";
+
             // Act
             bool shoudSaveSection = installationsHelper.AddOrUpdateScriptReference(configurationKey, assemblyMock.Object, scriptElements);
 

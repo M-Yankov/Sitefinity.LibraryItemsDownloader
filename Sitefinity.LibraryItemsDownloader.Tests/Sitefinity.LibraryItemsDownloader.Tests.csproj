@@ -75,6 +75,8 @@
     <Compile Include="Helpers\InstallationsHelperTests.cs" />
     <Compile Include="Helpers\UtilityHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Stubs\TestLogWriter.cs" />
+    <Compile Include="Stubs\FileZipModel.cs" />
     <Compile Include="Services\LibraryItemsDownloadServiceTests.cs" />
     <Compile Include="Stubs\AssemblyStub.cs" />
     <Compile Include="Stubs\ConfigElementListStub.cs" />

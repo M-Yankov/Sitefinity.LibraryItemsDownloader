@@ -1,37 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using Moq;
-using Sitefinity.LibraryItemsDownloader.Services;
-using Sitefinity.LibraryItemsDownloader.Services.Models;
-using Telerik.Sitefinity.Modules.Libraries;
-using Telerik.Sitefinity.Libraries.Model;
-using System.Linq.Expressions;
-using NUnit.Framework;
-using System.Globalization;
-using Telerik.Sitefinity.Lifecycle;
-using Telerik.OpenAccess.Metadata;
-using Telerik.Sitefinity.Data;
-using Telerik.Sitefinity.Model;
-using Telerik.Sitefinity.Security.Model;
-using Telerik.Sitefinity.Utilities.Zip;
-using Sitefinity.LibraryItemsDownloader.Helpers;
-using System.IO;
-using Telerik.Sitefinity;
-using Telerik.Sitefinity.GenericContent.Model;
-using Telerik.Sitefinity.Abstractions;
-using Telerik.Microsoft.Practices.EnterpriseLibrary.Logging;
-using Telerik.Microsoft.Practices.EnterpriseLibrary.Logging.Filters;
-
-namespace Sitefinity.LibraryItemsDownloader.Tests.Services
+﻿namespace Sitefinity.LibraryItemsDownloader.Tests.Services
 {
-    public class LibraryItemsDownloadServiceTests
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Linq.Expressions;
+
+    using Moq;
+    using NUnit.Framework;
+    using Sitefinity.LibraryItemsDownloader.Helpers;
+    using Sitefinity.LibraryItemsDownloader.Services;
+    using Sitefinity.LibraryItemsDownloader.Services.Models;
+    using Sitefinity.LibraryItemsDownloader.Tests.Services.Stubs;
+    using Telerik.Microsoft.Practices.EnterpriseLibrary.Logging;
+    using Telerik.Sitefinity;
+    using Telerik.Sitefinity.Abstractions;
+    using Telerik.Sitefinity.GenericContent.Model;
+    using Telerik.Sitefinity.Libraries.Model;
+    using Telerik.Sitefinity.Model;
+    using Telerik.Sitefinity.Utilities.Zip;
+
+    public partial class LibraryItemsDownloadServiceTests
     {
         private const string ReturnTestResult = "TestingContent";
+        private const string NotFoundExceptionMessage = "The file cannot be found. The server respond with status 404.";
+
         private Mock<LibraryItemsDownloadService> libraryItemsDownloadService;
         private Mock<ILibraryManagerHelper> managerHelper;
+        private Mock<TestLogWriter> testWriterMock;
 
         [SetUp]
         public void Initialize()
@@ -52,10 +49,10 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
             #endregion
 
             #region Hack Log.Writer
-            TestLogWriter testWriter = new TestLogWriter();
+            this.testWriterMock = new Mock<TestLogWriter>();
             typeof(Log)
                 .GetField("writer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.GetField | System.Reflection.BindingFlags.Static)
-                .SetValue(null, testWriter);
+                .SetValue(null, this.testWriterMock.Object);
             #endregion
 
             Mock<IUtilityHelper> utilityHelperMock = new Mock<IUtilityHelper>();
@@ -124,17 +121,17 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
                 .Verify(this.GetDownloadableContentMethodExpession<Document>(), Times.Once());
         }
 
+        #region GetDownloadableContent Tests
         [Test]
         public void ExpectGetDownloadableContentToReturnEmptyStringWhenIdsAreInWrongFormat()
         {
             // Arrange
             this.libraryItemsDownloadService
                 .Setup(this.GetSaveLibraryItemsToStreamMethodExpression<Video>())
-                //.Callback(this.DoNothing);
                 .Verifiable();
 
             ICollection<DownloadLibaryItemRequestModel> requestModels = new List<DownloadLibaryItemRequestModel>();
-            requestModels.Add(new DownloadLibaryItemRequestModel() { Id = "", IsFolder = false });
+            requestModels.Add(new DownloadLibaryItemRequestModel() { Id = string.Empty, IsFolder = false });
             requestModels.Add(new DownloadLibaryItemRequestModel() { Id = "1001012312031203", IsFolder = false });
             requestModels.Add(new DownloadLibaryItemRequestModel() { Id = "12312310-213-21233-", IsFolder = false });
             requestModels.Add(new DownloadLibaryItemRequestModel() { Id = "-   -  12313 ", IsFolder = false });
@@ -287,8 +284,10 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
             string expectedData = this.GetTestZipStreamBytesAsText(testFileFolderZip, testFileInFolderZip);
 
             Assert.AreEqual(expectedData, result);
-        }
+        } 
+        #endregion
 
+        #region SaveLibraryItemsToStreamRecursively Tests
         [Test]
         public void ExpectGetDownloadableContentToReturnemptyZipArchiveWhenHelperCannotFindTheFolder()
         {
@@ -424,13 +423,13 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
             Assert.AreEqual(expectedPath, zipStream.Entries[0].FileName);
             Assert.AreEqual(videoTitle.ToString(), zipStream.Entries[0].LocalFileName);
 
-            const int callsCount = 3;
+            const int CallsCount = 3;
 
             this.managerHelper
-                .Verify(helper => helper.GetChildFolders(It.IsAny<IFolder>()), Times.Exactly(callsCount));
+                .Verify(helper => helper.GetChildFolders(It.IsAny<IFolder>()), Times.Exactly(CallsCount));
 
             this.managerHelper
-                .Verify(helper => helper.GetChildItems(It.IsAny<IFolder>()), Times.Exactly(callsCount));
+                .Verify(helper => helper.GetChildItems(It.IsAny<IFolder>()), Times.Exactly(CallsCount));
         }
 
         [Test]
@@ -438,10 +437,10 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
         {
             var list = new List<Document>();
 
-            list.Add(this.GetMockContent<Document>("ReadMe.MD", "/Root").Object);
-            list.Add(this.GetMockContent<Document>("ReleaseNotes9.1.5600.txt", "/Root").Object);
-            list.Add(this.GetMockContent<Document>("Configuration.doc", "/Root").Object);
-            list.Add(this.GetMockContent<Document>("Sitefinity.lic", "/Root").Object);
+            list.Add(this.GetMockContent<Document>("ReadMe.MD", "/Root", Guid.Empty).Object);
+            list.Add(this.GetMockContent<Document>("ReleaseNotes9.1.5600.txt", "/Root", Guid.Empty).Object);
+            list.Add(this.GetMockContent<Document>("Configuration.doc", "/Root", Guid.Empty).Object);
+            list.Add(this.GetMockContent<Document>("Sitefinity.lic", "/Root", Guid.Empty).Object);
 
             // Arrange
             Lstring rootFolderTitle = "Root";
@@ -467,6 +466,8 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
             this.managerHelper
                .Verify(helper => helper.GetChildFolders(It.Is<IFolder>(f => f.Title == rootFolderTitle)), Times.Once());
         }
+
+        #endregion
 
         #region SaveLibraryItemsToStream Tests
         [Test]
@@ -504,81 +505,246 @@ namespace Sitefinity.LibraryItemsDownloader.Tests.Services
             this.managerHelper
                 .Verify(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()), Times.Exactly(guidList.Count));
         }
+
+        [Test]
+        public void ExpectSaveLibraryItemsToStreamToNotAddEntriesInZipAndCallLoggerWhenGetLiveBaseReturnsNull()
+        {
+            ZipFile zipArchive = new ZipFile();
+            List<Guid> contentItemIds = new List<Guid>() { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
+
+            Lstring videoTitle = "TestVideo";
+            Guid videoId = Guid.Parse("28b01ced-ec89-4ad1-939c-45310b124a8e");
+            Mock<Video> masterVersion = new Mock<Video>();
+            masterVersion.Setup(v => v.Title).Returns(videoTitle);
+            masterVersion.Setup(v => v.Id).Returns(videoId);
+
+            // Arrange
+            this.managerHelper
+                .Setup(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()))
+                .Returns(masterVersion.Object);
+
+            this.managerHelper
+                .Setup(helper => helper.GetLiveBase<Video>(It.IsAny<Video>()))
+                .Returns<Video>(null);
+
+            // Act
+            this.libraryItemsDownloadService.Object.SaveLibraryItemsToStream<Video>(contentItemIds, zipArchive, string.Empty);
+
+            // Assert
+            Assert.AreEqual(0, zipArchive.Entries.Count);
+
+            this.managerHelper
+                .Verify(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()), Times.Exactly(contentItemIds.Count));
+
+            this.managerHelper
+                .Verify(helper => helper.GetLiveBase<Video>(It.IsAny<Video>()), Times.Exactly(contentItemIds.Count));
+
+            string traceCategory = Enum.GetName(typeof(ConfigurationPolicy), ConfigurationPolicy.Trace);
+            string expectedMessage = $"LibraryItemsDownloader Info: Cannot find the live version of item. Title: { videoTitle.ToString() }, id: { videoId.ToString() }";
+
+            this.testWriterMock
+                .Verify(writer => writer.Write(It.Is<LogEntry>(entry => entry.Message == expectedMessage && entry.Categories.Contains(traceCategory))), Times.Exactly(contentItemIds.Count));
+        }
+
+        [Test]
+        public void ExpectSaveLibraryItemsToStreamToNotAddEntriesInZipAndCallLoggerWhenTheContentCannotBeDownloaded()
+        {
+            ZipFile zipArchive = new ZipFile();
+            List<Guid> contentItemIds = new List<Guid>() { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
+
+            Lstring videoTitle = "TestVideo";
+            Guid videoId = Guid.Parse("28b01ced-ec89-4ad1-939c-45310b124a8e");
+            Mock<Video> masterVersion = new Mock<Video>();
+            masterVersion.Setup(v => v.Title).Returns(videoTitle);
+            masterVersion.Setup(v => v.Id).Returns(videoId);
+
+            // Arrange
+            this.managerHelper
+                .Setup(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()))
+                .Returns(masterVersion.Object);
+
+            this.managerHelper
+                .Setup(helper => helper.GetLiveBase<Video>(It.IsAny<Video>()))
+                .Returns(masterVersion.Object);
+
+            this.managerHelper
+                .Setup(helper => helper.Download(It.IsAny<Video>()))
+                .Throws(new FileNotFoundException(NotFoundExceptionMessage));
+
+            // Act
+            this.libraryItemsDownloadService.Object.SaveLibraryItemsToStream<Video>(contentItemIds, zipArchive, string.Empty);
+
+            // Assert
+            Assert.AreEqual(0, zipArchive.Entries.Count);
+
+            this.managerHelper
+                .Verify(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()), Times.Exactly(contentItemIds.Count));
+
+            this.managerHelper
+                .Verify(helper => helper.GetLiveBase<Video>(It.IsAny<Video>()), Times.Exactly(contentItemIds.Count));
+
+            string traceCategory = Enum.GetName(typeof(ConfigurationPolicy), ConfigurationPolicy.ErrorLog);
+            string expectedMessage = $"LibraryItemsDownloader Error: { NotFoundExceptionMessage }{ Environment.NewLine }Item title: \"{ videoTitle.ToString() }\", id: { videoId.ToString() }";
+
+            this.testWriterMock
+                .Verify(writer => writer.Write(It.Is<LogEntry>(entry => entry.Message == expectedMessage && entry.Categories.Contains(traceCategory))), Times.Exactly(contentItemIds.Count));
+        }
+
+        [Test]
+        public void ExpectSaveLibraryItemsToStreamToAddAllEntriesCorrectly()
+        {
+            ZipFile zipArchive = new ZipFile();
+            Guid imageId1 = Guid.Parse("28b01ced-ec89-4ad1-939c-45310b124a8e");
+            Guid imageId2 = Guid.Parse("28b01ced-ec89-4ad1-939c-45310b124a8a");
+            Guid imageId3 = Guid.Parse("28b01ced-ec89-4ad1-939c-45310b124a8b");
+
+            List<Guid> contentItemIds = new List<Guid>() { imageId1, imageId2, imageId3 };
+
+            Lstring imageTitle1 = "TestImage.png";
+            Lstring imageTitle2 = "sample.gif";
+            Lstring imageTitle3 = "Picture.jpeg";
+
+            Mock<Image> imageMock1 = this.GetMockContent<Image>(imageTitle1, imageTitle1, imageId1);
+            Mock<Image> imageMock2 = this.GetMockContent<Image>(imageTitle2, imageTitle2, imageId2);
+            Mock<Image> imageMock3 = this.GetMockContent<Image>(imageTitle3, imageTitle3, imageId3);
+
+            int callsCount = 0;
+
+            // Arrange
+            this.managerHelper
+                .Setup(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()))
+                .Returns(() =>
+                {
+                    callsCount++;
+                    switch (callsCount)
+                    {
+                        case 1:
+                            return imageMock1.Object;
+                        case 2:
+                            return imageMock2.Object;
+                        case 3:
+                            return imageMock3.Object;
+                        default:
+                            return null;
+                    }
+                });
+
+            // It doesn't matter what this method returns in this case.
+            this.managerHelper
+                .Setup(helper => helper.GetLiveBase<Image>(It.IsAny<Image>()))
+                .Returns(imageMock1.Object);
+
+            Stream testStream = new MemoryStream();
+            this.managerHelper
+                .Setup(helper => helper.Download(It.IsAny<Image>()))
+                .Returns(testStream);
+
+            string directory = "/Rood";
+
+            // Act
+            this.libraryItemsDownloadService.Object.SaveLibraryItemsToStream<Image>(contentItemIds, zipArchive, directory);
+
+            // Assert
+            Assert.AreEqual(contentItemIds.Count, zipArchive.Entries.Count);
+
+            this.managerHelper
+                .Verify(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()), Times.Exactly(contentItemIds.Count));
+
+            this.managerHelper
+                .Verify(helper => helper.GetLiveBase<Image>(It.IsAny<Image>()), Times.Exactly(contentItemIds.Count));
+        }
+
+        [Test]
+        public void ExpectSaveLibraryItemsToStreamToAddEntriesCorrectlyWhenOneOfThemIsMissing()
+        {
+            ZipFile zipArchive = new ZipFile();
+            Guid imageId1 = Guid.Parse("28b01ced-ec89-4ad1-939c-45310b124a8e");
+            Guid imageId2 = Guid.Parse("28b01ced-ec89-4ad1-939c-45310b124a8a");
+            Guid imageId3 = Guid.Parse("28b01ced-ec89-4ad1-939c-45310b124a8b");
+
+            List<Guid> contentItemIds = new List<Guid>() { imageId1, imageId2, imageId3 };
+
+            Lstring imageTitle1 = "TestImage.png";
+            Lstring imageTitle2 = "sample.gif";
+            Lstring imageTitle3 = "Picture.jpeg";
+
+            Mock<Image> imageMock1 = this.GetMockContent<Image>(imageTitle1, imageTitle1, imageId1);
+            Mock<Image> imageMock2 = this.GetMockContent<Image>(imageTitle2, imageTitle2, imageId2);
+            Mock<Image> imageMock3 = this.GetMockContent<Image>(imageTitle3, imageTitle3, imageId3);
+
+            int callsCount = 0;
+
+            // Arrange
+            this.managerHelper
+                .Setup(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()))
+                .Returns(() =>
+                {
+                    callsCount++;
+                    switch (callsCount)
+                    {
+                        case 1:
+                            return imageMock1.Object;
+                        case 2:
+                            return imageMock2.Object;
+                        case 3:
+                            return imageMock3.Object;
+                        default:
+                            return null;
+                    }
+                });
+
+            // Always return the not found image.
+            this.managerHelper
+                .Setup(helper => helper.GetLiveBase<Image>(It.IsAny<Image>()))
+                .Returns(imageMock3.Object);
+
+            Stream testStream = new MemoryStream();
+            int callCountDownload = 0;
+            this.managerHelper
+                .Setup(helper => helper.Download(It.IsAny<Image>()))
+                .Returns<Image>((image) => 
+                {
+                    callCountDownload++;
+                    if (callCountDownload > 2)
+                    {
+                        throw new FileNotFoundException(NotFoundExceptionMessage);
+                    }
+
+                    return testStream;
+                });
+
+            string directory = "/Rood";
+
+            // Act
+            this.libraryItemsDownloadService.Object.SaveLibraryItemsToStream<Image>(contentItemIds, zipArchive, directory);
+
+            // Assert
+            Assert.AreEqual(contentItemIds.Count - 1, zipArchive.Entries.Count);
+
+            this.managerHelper
+                .Verify(helper => helper.GetItem(It.IsAny<Type>(), It.IsAny<Guid>()), Times.Exactly(contentItemIds.Count));
+
+            this.managerHelper
+                .Verify(helper => helper.GetLiveBase<Image>(It.IsAny<Image>()), Times.Exactly(contentItemIds.Count));
+
+            string traceCategory = Enum.GetName(typeof(ConfigurationPolicy), ConfigurationPolicy.ErrorLog);
+            string expectedMessage = $"LibraryItemsDownloader Error: { NotFoundExceptionMessage }{ Environment.NewLine }Item title: \"{ imageTitle3.ToString() }\", id: { imageId3.ToString() }";
+
+            this.testWriterMock
+                .Verify(writer => writer.Write(It.Is<LogEntry>(entry => entry.Message == expectedMessage && entry.Categories.Contains(traceCategory))), Times.Once());
+        }
         #endregion
 
-        public class TestLogWriter : LogWriter
+        private Mock<TContent> GetMockContent<TContent>(string title, string path, Guid guid) where TContent : MediaContent
         {
-            public override IDictionary<string, LogSource> TraceSources => throw new NotImplementedException();
-
-            public override T GetFilter<T>()
-            {
-                throw new NotImplementedException();
-            }
-
-            public override T GetFilter<T>(string name)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override ILogFilter GetFilter(string name)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override IEnumerable<LogSource> GetMatchingTraceSources(LogEntry logEntry)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override bool IsLoggingEnabled()
-            {
-                throw new NotImplementedException();
-            }
-
-            public override bool IsTracingEnabled()
-            {
-                throw new NotImplementedException();
-            }
-
-            public override bool ShouldLog(LogEntry log)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void Write(LogEntry log)
-            {
-             //   throw new NotImplementedException();
-            }
-        }
-
-        public class FileZipModel
-        {
-            public FileZipModel(string content, string filename, string directory)
-            {
-                this.Content = content;
-                this.FileNameWithExtension = filename;
-                this.DirectoryInZip = directory;
-            }
-
-            public string Content { get; set; }
-
-            public string FileNameWithExtension { get; set; }
-
-            public string DirectoryInZip { get; set; }
-
-            // Hack field - synchronize the last modified date between result data and expected data
-            public DateTime LastModified { get; set; }
-        }
-
-        private Mock<TContent> GetMockContent<TContent>(string title, string path) where TContent : MediaContent
-        {
-            Lstring videoTitle = title;
+            Lstring contentTile = title;
 
             Mock<TContent> contentMock = new Mock<TContent>();
-            contentMock.Setup(v => v.Title).Returns(videoTitle);
+            contentMock.Setup(v => v.Title).Returns(contentTile);
+            contentMock.Setup(v => v.Id).Returns(guid);
             contentMock.Object.Status = ContentLifecycleStatus.Live;
             contentMock.Object.MediaFileLinks.Add(new MediaFileLink() { Culture = CultureInfo.CurrentCulture.LCID });
-            contentMock.Object.FilePath = path + videoTitle;
+            contentMock.Object.FilePath = path + contentTile;
 
             return contentMock;
         }
