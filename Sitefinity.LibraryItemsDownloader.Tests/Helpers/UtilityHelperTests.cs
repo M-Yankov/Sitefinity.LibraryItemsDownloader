@@ -16,7 +16,7 @@
         [Test]
         public void ExpectReplaceInvlaidCharactersToReturnEmptyStringWhenTextIsNull()
         {
-            string result = this.helper.ReplaceInvlaidCharacters(null);
+            string result = this.helper.ReplaceInvalidCharacters(null);
             Assert.AreEqual(string.Empty, result);
         }
 
@@ -24,7 +24,7 @@
         public void ExpectReplaceInvlaidCharactersToReturnTheSameValueWhenItDoesNotContainSpecialSymbols()
         {
             string text = ".NETCORE2.0.1";
-            string result = this.helper.ReplaceInvlaidCharacters(text);
+            string result = this.helper.ReplaceInvalidCharacters(text);
             Assert.AreEqual(text, result);
         }
 
@@ -32,7 +32,7 @@
         public void ExpectReplaceInvlaidCharactersToReplaceSpecialSymbolsWithDefaultReplacer()
         {
             string text = "?<>.NETCORE2.0.1 |:*";
-            string result = this.helper.ReplaceInvlaidCharacters(text);
+            string result = this.helper.ReplaceInvalidCharacters(text);
             Assert.AreEqual("___.NETCORE2.0.1 ___", result);
         }
 
@@ -40,7 +40,7 @@
         public void ExpectReplaceInvlaidCharactersToReplaceSpecialSymbolsWithProvidedReplacer()
         {
             string text = "?<>.NETCORE2.0.1 |:*";
-            string result = this.helper.ReplaceInvlaidCharacters(text, " ");
+            string result = this.helper.ReplaceInvalidCharacters(text, " ");
             Assert.AreEqual("   .NETCORE2.0.1    ", result);
         }
 
@@ -48,7 +48,7 @@
         public void ExpectReplaceInvlaidCharactersToRemoveSpecialSymbolsWithProvidedReplacer()
         {
             string text = "?<>.NETCORE2.0.1 |:*";
-            string result = this.helper.ReplaceInvlaidCharacters(text, string.Empty);
+            string result = this.helper.ReplaceInvalidCharacters(text, string.Empty);
             Assert.AreEqual(".NETCORE2.0.1 ", result);
         }
     }
