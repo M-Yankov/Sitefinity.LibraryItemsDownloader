@@ -24,7 +24,6 @@
         /// Saves the changes related to the provided section. If <paramref name= "useFileSystemMode" /> is true it will save changes in config files.
         /// </summary>
         /// <param name="section">Modified section to save.</param>
-        /// <param name="useFileSystemMode">Whether to save section in file system or in database.</param>
-        void SaveSection(ConfigSection section, bool useFileSystemMode);
+        void SaveSection(ConfigSection section);
     }
 }

@@ -42,7 +42,7 @@
         /// </summary>
         /// <param name="section">Modified section to save.</param>
         /// <param name="useFileSystemMode">Whether to save section in file system or in database.</param>
-        public void SaveSection(ConfigSection section, bool useFileSystemMode)
+        public void SaveSection(ConfigSection section)
         {
             this.configManager.SaveSection(section);
         }
