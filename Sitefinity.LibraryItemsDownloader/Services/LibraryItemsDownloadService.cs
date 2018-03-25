@@ -16,6 +16,10 @@
     using Telerik.Sitefinity.Utilities.Zip;
     using Telerik.Sitefinity.Web.Services;
 
+    /// <summary>
+    /// The Client (Browser, JavaScirpt) makes ajax calls to this service.
+    /// </summary>
+    /// <seealso cref="Sitefinity.LibraryItemsDownloader.Services.ILibraryItemsDownloadService" />
     [ServiceBehavior(IncludeExceptionDetailInFaults = true, InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Single)]
     [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Required)]
     public class LibraryItemsDownloadService : ILibraryItemsDownloadService
@@ -37,24 +41,52 @@
             this.libraryManagerHelper = libraryManagerHelper;
         }
 
+        /// <summary>
+        /// Downloads selected images including folders, if they are selected.
+        /// </summary>
+        /// <param name="imagesRequest">Request model which items to add in the archive.</param>
+        /// <returns>
+        /// The zip archive as string content.
+        /// </returns>
         public virtual string DownloadImages(IEnumerable<DownloadLibaryItemRequestModel> imagesRequest)
         {
             string result = this.GetDownloadableContent<Image>(imagesRequest);
             return result;
         }
 
+        /// <summary>
+        /// Downloads selected videos including folders, if they are selected.
+        /// </summary>
+        /// <param name="videosRequest">Request model which items to add in the archive.</param>
+        /// <returns>
+        /// A zip archive as string content.
+        /// </returns>
         public string DownloadVideos(IEnumerable<DownloadLibaryItemRequestModel> videosRequest)
         {
             string result = this.GetDownloadableContent<Video>(videosRequest);
             return result;
         }
 
+        /// <summary>
+        /// Downloads selected documents including folders, if they are selected.
+        /// </summary>
+        /// <param name="documentsRequest">Request model which items to add in the archive.</param>
+        /// <returns>
+        /// A zip archive as string content.
+        /// </returns>
         public string DownloadDocuments(IEnumerable<DownloadLibaryItemRequestModel> documentsRequest)
         {
             string result = this.GetDownloadableContent<Document>(documentsRequest);
             return result;
         }
 
+        /// <summary>
+        /// Generic method that works with images, videos or documents and returns a zip archive as string.
+        /// In case of broken items - an empty zip archive is returned.
+        /// </summary>
+        /// <typeparam name="TContent">The type of the content (Image, Video, Document).</typeparam>
+        /// <param name="contentItemsRequest">Request model which items to add in the archive.</param>
+        /// <returns>A zip archive as string content.</returns>
         public virtual string GetDownloadableContent<TContent>(IEnumerable<DownloadLibaryItemRequestModel> requestModels) where TContent : MediaContent
         {
             this.VerifyUserHasPermissionsToAceessService();
@@ -101,15 +133,25 @@
             return result;
         }
 
+        /// <summary>
+        /// Allow only back-end users to access this service.
+        /// </summary>
         public virtual void VerifyUserHasPermissionsToAceessService()
         {
             ServiceUtility.RequestBackendUserAuthentication();
         }
 
+        /// <summary>
+        /// Saves items from folder into <paramref name="zipStream"/> recursively (Including all nested folders). Invalid symbols for a windows file will be replaced.
+        /// </summary>
+        /// <typeparam name="TContent">The type of the content (Image, Video, Document).</typeparam>
+        /// <param name="folder">The folder with content items.</param>
+        /// <param name="zipStream">The zip stream.</param>
+        /// <param name="directoryPathInArchive">The directory path in archive. Can be string.Empty.</param>
         public virtual void SaveLibraryItemsToStreamRecursively<TContent>(IFolder folder, ZipFile zipStream, string directoryPathInArchive) where TContent : MediaContent
         {
             IEnumerable<IFolder> innerFolders = this.libraryManagerHelper.GetChildFolders(folder).ToList();
-            string titleSaveName = this.utilityHelper.ReplaceInvlaidCharacters(folder.Title.Trim());
+            string titleSaveName = this.utilityHelper.ReplaceInvalidCharacters(folder.Title.Trim());
             string innerFolderPathName = Path.Combine(directoryPathInArchive, titleSaveName);
 
             foreach (IFolder innerFolder in innerFolders ?? Enumerable.Empty<IFolder>())
@@ -132,6 +174,13 @@
             }
         }
 
+        /// <summary>
+        /// Saves selected items into <paramref name="zipStream"/>. Logs into sitefinit log files message, in case an item cannot be downloaded.
+        /// </summary>
+        /// <typeparam name="TContent">The type of the content (Image, Video, Document).</typeparam>
+        /// <param name="selectedItemIds">Ids the content items.</param>
+        /// <param name="zipStream">The zip stream.</param>
+        /// <param name="directoryPathInArchive">The directory path in archive. Can be string.Empty.</param>
         public virtual void SaveLibraryItemsToStream<TContent>(IEnumerable<Guid> selectedItemIds, ZipFile zipStream, string directoryPathInArchive) where TContent : MediaContent
         {
             foreach (Guid selectedId in selectedItemIds ?? Enumerable.Empty<Guid>())
@@ -167,6 +216,7 @@
                     }
 
                     string contentItemName = Path.GetFileName(contentItem.FilePath);
+
                     zipStream.AddFileStream(contentItemName, directoryPathInArchive, downloadStream);
                 }
             }
