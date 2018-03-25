@@ -7,11 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sitefinity.LibraryItemsDown
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sitefinity.LibraryItemsDownloader.Tests", "Sitefinity.LibraryItemsDownloader.Tests\Sitefinity.LibraryItemsDownloader.Tests.csproj", "{22567BE4-AA9F-4146-B59A-5C61DB0E75FB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BF7F7318-0EA8-48B7-B7F9-EDD2177448F8}"
-	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -1,6 +1,13 @@
-﻿version: 9.1.5600.{build}
+﻿version: 9.1.6100.{build}
 skip_tags: true
 configuration: Release
+branches:
+  # whitelist
+  only:
+    - master
+    - development
+    - 7.3.5600
+    - 9.1.6100
 assembly_info:
   patch: true
   file: '**\AssemblyInfo.*'
@@ -10,17 +17,21 @@ assembly_info:
 environment:
   COVERALLS_REPO_TOKEN:
     secure: CxtxhzTDroUZSX38zavXXCITUQ8pKTI1k
+install:
+  - nuget sources add -Name Sitefinity -Source http://nuget.sitefinity.com/nuget/
 before_build:
   - nuget restore Sitefinity.LibraryItemsDownloader.sln
 build:
   project: Sitefinity.LibraryItemsDownloader.sln
   verbosity: minimal
+# --commitEmail $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL
 test_script:
 - ps: >-
-    .\packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -register:user -target:.\packages\NUnit.ConsoleRunner.3.8.0\tools\nunit3-console.exe -targetargs:".\Sitefinity.LibraryItemsDownloader.Tests\bin\Debug\Sitefinity.LibraryItemsDownloader.Tests.dll -shadowcopy"  -output:opencoverCoverage.xml
+    .\packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -register:user -target:.\packages\NUnit.ConsoleRunner.3.8.0\tools\nunit3-console.exe -targetargs:".\Sitefinity.LibraryItemsDownloader.Tests\bin\$env:CONFIGURATION\Sitefinity.LibraryItemsDownloader.Tests.dll" -filter:"+[Sitefinity.LibraryItemsDownloader*]* -[Sitefinity.LibraryItemsDownloader.Tests]*"  -output:opencoverCoverage.xml
 
     $coveralls = (Resolve-Path "packages/coveralls.net.*/tools/csmacnz.coveralls.exe").ToString()
     
-    $env:APPVEYOR_BUILD_NUMBER
+    "Build Number: " + $env:APPVEYOR_BUILD_NUMBER
+    "Token " + $env:COVERALLS_REPO_TOKEN
     
-    & $coveralls --opencover -i opencoverCoverage.xml --repoToken $env:COVERALLS_REPO_TOKEN --useRelativePaths --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR  --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_BUILD_NUMBER --serviceName appveyor
+    & $coveralls --opencover -i opencoverCoverage.xml --repoToken $env:COVERALLS_REPO_TOKEN --useRelativePaths --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR --commitEmail LibraryItemsDownloader@sitefinity2.com  --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_BUILD_NUMBER --serviceName appveyor

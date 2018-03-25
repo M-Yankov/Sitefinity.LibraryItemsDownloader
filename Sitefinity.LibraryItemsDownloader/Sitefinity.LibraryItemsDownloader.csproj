@@ -36,10 +36,11 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>mihyan.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <DelaySign>false</DelaySign>
@@ -90,7 +91,6 @@
     <None Include="App.config" />
     <None Include="Libraries\7.3.5600.0.zip" />
     <None Include="Libraries\9.1.6100.zip" />
-    <None Include="mihyan.snk" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="LibraryItemsDownloadService.min.js">
