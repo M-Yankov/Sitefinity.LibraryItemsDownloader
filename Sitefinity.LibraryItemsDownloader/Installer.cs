@@ -3,6 +3,7 @@
     using System;
     using Sitefinity.LibraryItemsDownloader.Helpers;
     using Sitefinity.LibraryItemsDownloader.Services;
+    using Telerik.Sitefinity.Configuration;
     using Telerik.Sitefinity.Services;
 
     public class Installer
@@ -15,7 +16,9 @@
         private static void ApplicationStartHandler(object sender, EventArgs e)
         {
             SystemManager.RegisterWebService(typeof(LibraryItemsDownloadService), LibraryItemsDownloadService.WebServicePath);
-            new InstallationsHelper().Initialize();
+
+            IConfigManagerHelper managerHelper = new ConfigManagerHelper(ConfigManager.GetManager());
+            new InstallationsHelper(managerHelper).Initialize();
         }
     }
 }
