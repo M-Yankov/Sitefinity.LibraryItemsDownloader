@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\Sitefinity.LibraryItemsDownloader.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -35,10 +36,11 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>mihyan.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <DelaySign>false</DelaySign>
@@ -87,12 +89,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="mihyan.snk" />
+    <None Include="Libraries\7.3.5600.0.zip" />
+    <None Include="Libraries\9.1.6100.zip" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="LibraryItemsDownloadService.min.js">
       <DependentUpon>LibraryItemsDownloadService.js</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Libraries\Telerik.OpenAccess.dll" />
+    <Content Include="Libraries\Telerik.Sitefinity.dll" />
+    <Content Include="Libraries\Telerik.Sitefinity.Model.dll" />
+    <Content Include="Libraries\Telerik.Sitefinity.Utilities.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -11,7 +11,13 @@
     /// </summary>
     public class TestLogWriter : LogWriter
     {
-        public override IDictionary<string, LogSource> TraceSources => throw new NotImplementedException();
+        public override IDictionary<string, LogSource> TraceSources
+        {
+            get
+            {
+                return null;
+            }
+        }
 
         public override T GetFilter<T>()
         {
