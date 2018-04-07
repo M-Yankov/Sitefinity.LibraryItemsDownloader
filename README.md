@@ -26,7 +26,7 @@ Also you can select a folder and it will collect all of the content recursively 
 
 | Demo |
 | ----- |
-|   ![ScreenShot Old Versions](./Images/Demo.gif)  |
+|   ![Demo](./Images/demo.gif)  |
 
 
 In order to download items from more than one library at once, you can use filter all library items. _(Usually located at the right site of the page)_
